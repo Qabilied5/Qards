@@ -9,7 +9,7 @@ const io = new Server(server, {
   cors: { origin: '*' }
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '..')));
 
 // ─── Game Constants ───────────────────────────────────────────────────────────
 const STARTING_COINS = 100;
