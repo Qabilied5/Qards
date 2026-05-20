@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚔️ Duel Kartu — 2 Player Battle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #d4a843;
+    --gold-light: #f0c96e;
+    --gold-dark: #8b6914;
+    --blood: #8b1a1a;
+    --blood-light: #c0392b;
+    --deep: #0a0608;
+    --dark: #12090e;
+    --panel: #1a0d15;
+    --panel2: #22101c;
+    --text: #e8d5b0;
+    --muted: #8a7060;
+    --attack: #c0392b;
+    --defense: #1a6b8a;
+    --special: #7b2d8b;
+    --coin: #f1c40f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--deep);
+    color: var(--text);
+    font-family: 'Crimson Text', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(139,26,26,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(123,45,139,0.06) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 L35 25 L55 25 L40 37 L45 57 L30 45 L15 57 L20 37 L5 25 L25 25Z' fill='none' stroke='%23ffffff05' stroke-width='1'/%3E%3C/svg%3E");
+  }
+
+  /* ── LOBBY ─────────────────────────────────────────────── */
+  #lobby {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+  }
+
+  .lobby-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(2rem, 6vw, 4rem);
+    color: var(--gold);
+    text-align: center;
+    text-shadow: 0 0 40px rgba(212,168,67,0.6), 0 2px 4px rgba(0,0,0,0.8);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.3rem;
+  }
+
+  .lobby-sub {
+    font-family: 'Cinzel', serif;
+    color: var(--muted);
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+  }
+
+  .lobby-card {
+    background: linear-gradient(145deg, var(--panel), var(--panel2));
+    border: 1px solid var(--gold-dark);
+    border-radius: 16px;
+    padding: 2.5rem;
+    width: min(480px, 100%);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(212,168,67,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .lobby-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .field-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .field-input {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--gold-dark);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: 'Crimson Text', serif;
+    font-size: 1.1rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 1.25rem;
+  }
+
+  .field-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px rgba(212,168,67,0.15);
+  }
+
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-dark));
+    border: none;
+    border-radius: 8px;
+    padding: 0.9rem 2rem;
+    color: var(--deep);
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    text-transform: uppercase;
+  }
+
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .divider {
+    text-align: center;
+    color: var(--muted);
+    margin: 1.5rem 0;
+    position: relative;
+    font-size: 0.85rem;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    position: absolute;
+    top: 50%; width: 35%;
+    height: 1px;
+    background: var(--gold-dark);
+    opacity: 0.4;
+  }
+  .divider::before { left: 0; }
+  .divider::after { right: 0; }
+
+  #statusMsg {
+    text-align: center;
+    font-size: 1rem;
+    color: var(--gold-light);
+    margin-top: 1rem;
+    min-height: 1.4rem;
+    font-style: italic;
+  }
+
+  /* ── GAME SCREEN ──────────────────────────────────────── */
+  #game { display: none; flex-direction: column; min-height: 100vh; padding: 1rem; gap: 0.75rem; }
+
+  /* Header */
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 1.2rem;
+    background: var(--panel);
+    border: 1px solid var(--gold-dark);
+    border-radius: 10px;
+  }
+
+  .game-title {
+    font-family: 'Cinzel Decorative', cursive;
+    color: var(--gold);
+    font-size: 1.2rem;
+  }
+
+  .round-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* Arena */
+  .arena {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0.75rem;
+    align-items: start;
+  }
+
+  /* Player panels */
+  .player-panel {
+    background: linear-gradient(160deg, var(--panel), var(--panel2));
+    border: 1px solid var(--gold-dark);
+    border-radius: 12px;
+    padding: 1rem;
+    position: relative;
+  }
+
+  .player-panel.active {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(212,168,67,0.25);
+  }
+
+  .player-panel.me { border-color: rgba(26,107,138,0.5); }
+  .player-panel.me.active { border-color: #1a6b8a; box-shadow: 0 0 20px rgba(26,107,138,0.3); }
+
+  .player-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    color: var(--gold-light);
+    margin-bottom: 0.5rem;
+  }
+
+  .coins-display {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--coin);
+    font-family: 'Cinzel', serif;
+  }
+
+  .coins-display .coin-icon { font-size: 1.1rem; }
+
+  .coins-bar {
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+  }
+
+  .coins-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  .turn-indicator {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    display: inline-block;
+    margin-top: 0.5rem;
+  }
+  .turn-indicator.your-turn { background: rgba(26,107,138,0.3); color: #5bc4e8; }
+  .turn-indicator.opp-turn  { background: rgba(139,26,26,0.3); color: #e87c7c; }
+
+  /* Center VS area */
+  .center-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .vs-text {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 1.4rem;
+    color: var(--blood-light);
+    text-shadow: 0 0 20px rgba(192,57,43,0.6);
+  }
+
+  .pot-display {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--gold);
+    text-align: center;
+  }
+
+  .played-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  .played-mini-card {
+    background: var(--panel2);
+    border: 1px solid var(--gold-dark);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+    min-width: 100px;
+  }
+
+  /* Hand */
+  .hand-section {
+    background: var(--panel);
+    border: 1px solid var(--gold-dark);
+    border-radius: 12px;
+    padding: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold-dark);
+    margin-bottom: 0.75rem;
+  }
+
+  .bet-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .bet-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .bet-input {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--gold-dark);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    color: var(--coin);
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    width: 80px;
+    text-align: center;
+    outline: none;
+  }
+
+  .bet-btn {
+    background: rgba(212,168,67,0.1);
+    border: 1px solid var(--gold-dark);
+    border-radius: 4px;
+    color: var(--gold);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+  }
+  .bet-btn:hover { background: rgba(212,168,67,0.2); }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.6rem;
+  }
+
+  .card {
+    background: linear-gradient(160deg, var(--panel2), var(--dark));
+    border-radius: 10px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid transparent;
+  }
+
+  .card.attack  { border-color: rgba(192,57,43,0.4); }
+  .card.defense { border-color: rgba(26,107,138,0.4); }
+  .card.special { border-color: rgba(123,45,139,0.4); }
+
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  }
+
+  .card.attack:hover  { border-color: var(--attack);  box-shadow: 0 8px 20px rgba(192,57,43,0.3); }
+  .card.defense:hover { border-color: var(--defense); box-shadow: 0 8px 20px rgba(26,107,138,0.3); }
+  .card.special:hover { border-color: var(--special); box-shadow: 0 8px 20px rgba(123,45,139,0.3); }
+
+  .card.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+  .card-type-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.4rem;
+    border-radius: 20px;
+    margin-bottom: 0.4rem;
+    display: inline-block;
+  }
+
+  .card.attack  .card-type-badge { background: rgba(192,57,43,0.25); color: #e87c7c; }
+  .card.defense .card-type-badge { background: rgba(26,107,138,0.25); color: #7cc4e8; }
+  .card.special .card-type-badge { background: rgba(123,45,139,0.25); color: #c87ce8; }
+
+  .card-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+
+  .card-desc {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.3;
+    margin-bottom: 0.4rem;
+    font-style: italic;
+  }
+
+  .card-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+  }
+
+  .stat-power { color: var(--blood-light); }
+  .stat-block { color: #5bc4e8; }
+  .stat-cost  { color: var(--coin); }
+
+  .card-glow {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .card.attack  .card-glow { background: radial-gradient(ellipse at center, rgba(192,57,43,0.15) 0%, transparent 70%); }
+  .card.defense .card-glow { background: radial-gradient(ellipse at center, rgba(26,107,138,0.15) 0%, transparent 70%); }
+  .card.special .card-glow { background: radial-gradient(ellipse at center, rgba(123,45,139,0.15) 0%, transparent 70%); }
+  .card:hover .card-glow { opacity: 1; }
+
+  /* Log */
+  .log-section {
+    background: var(--panel);
+    border: 1px solid var(--gold-dark);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    max-height: 140px;
+    overflow-y: auto;
+  }
+
+  .log-entry {
+    font-size: 0.85rem;
+    color: var(--muted);
+    padding: 0.2rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .log-entry:first-child { color: var(--text); }
+
+  /* Opp hand */
+  .opp-hand-count {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+  }
+
+  .card-back {
+    width: 36px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--blood) 0%, var(--panel2) 100%);
+    border: 1px solid var(--gold-dark);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  /* Overlay / Modal */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .overlay.show { display: flex; }
+
+  .modal {
+    background: linear-gradient(145deg, var(--panel), var(--panel2));
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+  }
+
+  .modal-icon { font-size: 4rem; margin-bottom: 1rem; }
+
+  .modal-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .modal-sub {
+    font-size: 1rem;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-btns { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    border: none;
+    border-radius: 8px;
+    padding: 0.7rem 1.8rem;
+    color: var(--deep);
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+  }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--gold-dark);
+    border-radius: 8px;
+    padding: 0.7rem 1.8rem;
+    color: var(--muted);
+    font-family: 'Cinzel', serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  /* Notification toast */
+  #toast {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: var(--panel2);
+    border: 1px solid var(--gold-dark);
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--gold-light);
+    z-index: 200;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  .waiting-anim {
+    display: inline-block;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  @media (max-width: 700px) {
+    .arena { grid-template-columns: 1fr; }
+    .center-area { flex-direction: row; justify-content: space-around; padding: 0; }
+    .cards-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOBBY -->
+<div id="lobby">
+  <h1 class="lobby-title">⚔️ Duel Kartu</h1>
+  <p class="lobby-sub">Pertarungan Strategis 2 Pemain</p>
+
+  <div class="lobby-card">
+    <div class="field-label">Nama Kamu</div>
+    <input class="field-input" id="playerName" placeholder="Masukkan nama..." maxlength="20">
+
+    <div class="field-label">Kode Room</div>
+    <input class="field-input" id="roomId" placeholder="Buat atau masukkan kode room..." maxlength="20">
+
+    <button class="btn-primary" onclick="joinRoom()">⚔️ Masuk Arena</button>
+
+    <div class="divider">atau buat room baru</div>
+    <button class="btn-primary" style="background: linear-gradient(135deg,#1a6b8a,#2980b9)" onclick="createRoom()">🆕 Buat Room Baru</button>
+
+    <p id="statusMsg"></p>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game">
+  <div class="game-header">
+    <span class="game-title">⚔️ Duel Kartu</span>
+    <span id="roundBadge" class="round-badge">RONDE 1</span>
+    <span id="roomBadge" class="round-badge" style="color:var(--gold-dark)"></span>
+  </div>
+
+  <!-- Arena row -->
+  <div class="arena">
+    <!-- Opponent -->
+    <div class="player-panel" id="oppPanel">
+      <div class="player-name" id="oppName">Lawan</div>
+      <div class="coins-display">
+        <span class="coin-icon">🪙</span>
+        <span id="oppCoins">100</span>
+      </div>
+      <div class="coins-bar"><div class="coins-fill" id="oppCoinBar" style="width:100%"></div></div>
+      <div class="opp-hand-count" id="oppHandDisplay" style="margin-top:0.75rem;"></div>
+    </div>
+
+    <!-- Center -->
+    <div class="center-area">
+      <div class="vs-text">VS</div>
+      <div class="pot-display">
+        🏺 Pot: <span id="potDisplay">0</span>
+      </div>
+      <div class="played-cards" id="playedCards"></div>
+    </div>
+
+    <!-- Me -->
+    <div class="player-panel me" id="myPanel">
+      <div class="player-name" id="myName">Kamu</div>
+      <div class="coins-display">
+        <span class="coin-icon">🪙</span>
+        <span id="myCoins">100</span>
+      </div>
+      <div class="coins-bar"><div class="coins-fill" id="myCoinBar" style="width:100%"></div></div>
+      <div id="turnIndicator" class="turn-indicator" style="margin-top:0.5rem;"></div>
+    </div>
+  </div>
+
+  <!-- Hand -->
+  <div class="hand-section">
+    <div class="section-title">🃏 Kartu di Tangan</div>
+    <div class="bet-row">
+      <span class="bet-label">💰 Taruhan:</span>
+      <input class="bet-input" id="betInput" type="number" min="0" value="0" placeholder="0">
+      <button class="bet-btn" onclick="setBet(5)">+5</button>
+      <button class="bet-btn" onclick="setBet(10)">+10</button>
+      <button class="bet-btn" onclick="setBet(25)">+25</button>
+      <button class="bet-btn" onclick="document.getElementById('betInput').value=0">Reset</button>
+    </div>
+    <div class="cards-grid" id="handGrid"></div>
+  </div>
+
+  <!-- Log -->
+  <div class="log-section">
+    <div class="section-title">📜 Log Pertempuran</div>
+    <div id="battleLog"></div>
+  </div>
+</div>
+
+<!-- Game Over Modal -->
+<div class="overlay" id="gameOverOverlay">
+  <div class="modal">
+    <div class="modal-icon" id="goIcon">🏆</div>
+    <div class="modal-title" id="goTitle">Menang!</div>
+    <div class="modal-sub" id="goSub"></div>
+    <div class="modal-btns">
+      <button class="btn-gold" onclick="requestRematch()">🔄 Main Lagi</button>
+      <button class="btn-ghost" onclick="backToLobby()">🚪 Keluar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+let myId = null, currentRoomId = null, myCoinsMax = 100, oppCoinsMax = 100;
+
+// ── Helpers ──────────────────────────────────────────────────
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function setBet(amt) {
+  const inp = document.getElementById('betInput');
+  inp.value = parseInt(inp.value || 0) + amt;
+}
+
+function genRoomCode() {
+  return Math.random().toString(36).slice(2,8).toUpperCase();
+}
+
+function createRoom() {
+  document.getElementById('roomId').value = genRoomCode();
+  joinRoom();
+}
+
+function joinRoom() {
+  const name = document.getElementById('playerName').value.trim() || 'Pejuang';
+  const room = document.getElementById('roomId').value.trim();
+  if (!room) { showToast('Masukkan kode room!'); return; }
+  document.getElementById('statusMsg').innerHTML = '<span class="waiting-anim">⏳ Menghubungkan...</span>';
+  socket.emit('joinRoom', { roomId: room, playerName: name });
+  currentRoomId = room;
+}
+
+// ── Render ───────────────────────────────────────────────────
+function renderState(s) {
+  myCoinsMax = Math.max(myCoinsMax, s.myCoins);
+  oppCoinsMax = Math.max(oppCoinsMax, s.oppCoins);
+
+  document.getElementById('myName').textContent = '🧙 ' + s.myName;
+  document.getElementById('oppName').textContent = '👺 ' + s.oppName;
+  document.getElementById('myCoins').textContent = s.myCoins;
+  document.getElementById('oppCoins').textContent = s.oppCoins;
+  document.getElementById('roundBadge').textContent = 'RONDE ' + s.round;
+  document.getElementById('potDisplay').textContent = s.roundBet;
+  document.getElementById('roomBadge').textContent = '🏠 ' + currentRoomId;
+
+  const myPct = Math.max(0, (s.myCoins / Math.max(myCoinsMax, 100)) * 100);
+  const oppPct = Math.max(0, (s.oppCoins / Math.max(oppCoinsMax, 100)) * 100);
+  document.getElementById('myCoinBar').style.width = myPct + '%';
+  document.getElementById('oppCoinBar').style.width = oppPct + '%';
+
+  // Turn indicator
+  const ind = document.getElementById('turnIndicator');
+  const isMyTurn = s.turn === myId;
+  ind.className = 'turn-indicator ' + (isMyTurn ? 'your-turn' : 'opp-turn');
+  ind.textContent = isMyTurn ? '⚡ Giliran Kamu!' : '⏳ Giliran Lawan';
+
+  // Panel highlights
+  document.getElementById('myPanel').className = 'player-panel me' + (isMyTurn ? ' active' : '');
+  document.getElementById('oppPanel').className = 'player-panel' + (!isMyTurn ? ' active' : '');
+
+  // Opp hand display
+  const ohd = document.getElementById('oppHandDisplay');
+  ohd.innerHTML = '';
+  for (let i = 0; i < s.oppHandCount; i++) {
+    const cb = document.createElement('div');
+    cb.className = 'card-back';
+    cb.textContent = '🂠';
+    ohd.appendChild(cb);
+  }
+
+  // Played cards
+  const pc = document.getElementById('playedCards');
+  pc.innerHTML = '';
+  if (s.oppPlayedCard) {
+    pc.innerHTML += `<div class="played-mini-card">👺 ${s.oppPlayedCard.name}</div>`;
+  }
+  if (s.myPlayedCard) {
+    pc.innerHTML += `<div class="played-mini-card">🧙 ${s.myPlayedCard.name}</div>`;
+  }
+
+  // Hand
+  const grid = document.getElementById('handGrid');
+  grid.innerHTML = '';
+  const disabled = !isMyTurn || s.phase !== 'playing';
+
+  s.myHand.forEach(card => {
+    const canAfford = s.myCoins >= card.cost;
+    const div = document.createElement('div');
+    div.className = `card ${card.type}${disabled || !canAfford ? ' disabled' : ''}`;
+    div.onclick = () => playCard(card.id);
+
+    let statHtml = '';
+    if (card.type === 'attack')  statHtml = `<span class="stat-power">⚔️ ${card.power}</span>`;
+    if (card.type === 'defense') statHtml = `<span class="stat-block">🛡️ ${card.block}</span>`;
+    if (card.type === 'special') statHtml = `<span style="color:#c87ce8">✨ Efek</span>`;
+
+    div.innerHTML = `
+      <div class="card-glow"></div>
+      <div class="card-type-badge">${card.type === 'attack' ? '⚔️ Serang' : card.type === 'defense' ? '🛡️ Bertahan' : '✨ Spesial'}</div>
+      <div class="card-name">${card.name}</div>
+      <div class="card-desc">${card.desc}</div>
+      <div class="card-stats">
+        ${statHtml}
+        <span class="stat-cost">🪙 ${card.cost}</span>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+
+  // Log
+  const bl = document.getElementById('battleLog');
+  bl.innerHTML = '';
+  (s.log || []).forEach((entry, i) => {
+    const d = document.createElement('div');
+    d.className = 'log-entry';
+    d.textContent = entry.msg;
+    bl.appendChild(d);
+  });
+
+  // Status badges
+  if (s.doubleActive) showToast('✨ Kartu Gandakan aktif!', 1500);
+  if (s.mirrorActive) showToast('🪞 Kartu Cermin aktif!', 1500);
+}
+
+function playCard(cardId) {
+  const bet = parseInt(document.getElementById('betInput').value) || 0;
+  socket.emit('playCard', { cardId, bet });
+  document.getElementById('betInput').value = 0;
+}
+
+function requestRematch() {
+  document.getElementById('gameOverOverlay').classList.remove('show');
+  socket.emit('rematch', { roomId: currentRoomId });
+}
+
+function backToLobby() {
+  location.reload();
+}
+
+// ── Socket events ────────────────────────────────────────────
+socket.on('joined', ({ roomId, playerId, playerName }) => {
+  myId = playerId;
+  currentRoomId = roomId;
+  document.getElementById('statusMsg').textContent = `✅ Bergabung sebagai ${playerName}! Room: ${roomId}`;
+});
+
+socket.on('waiting', ({ msg }) => {
+  document.getElementById('statusMsg').innerHTML = `<span class="waiting-anim">⏳ ${msg}</span>`;
+  showToast('Bagikan kode room: ' + currentRoomId, 5000);
+});
+
+socket.on('roomFull', () => {
+  document.getElementById('statusMsg').textContent = '❌ Room penuh!';
+  showToast('❌ Room sudah penuh!');
+});
+
+socket.on('gameState', (s) => {
+  document.getElementById('lobby').style.display = 'none';
+  document.getElementById('game').style.display = 'flex';
+  renderState(s);
+});
+
+socket.on('gameOver', ({ winner, winnerName, loserName, isWinner, draw }) => {
+  const overlay = document.getElementById('gameOverOverlay');
+  if (draw) {
+    document.getElementById('goIcon').textContent = '🤝';
+    document.getElementById('goTitle').textContent = 'Seri!';
+    document.getElementById('goSub').textContent = 'Dua-duanya kehabisan koin!';
+  } else if (isWinner) {
+    document.getElementById('goIcon').textContent = '🏆';
+    document.getElementById('goTitle').textContent = 'KAMU MENANG!';
+    document.getElementById('goSub').textContent = `${loserName} kehabisan koin. Kamu juaranya!`;
+  } else {
+    document.getElementById('goIcon').textContent = '💀';
+    document.getElementById('goTitle').textContent = 'KAMU KALAH!';
+    document.getElementById('goSub').textContent = `${winnerName} mengalahkan kamu. Jangan menyerah!`;
+  }
+  overlay.classList.add('show');
+});
+
+socket.on('opponentLeft', ({ msg }) => {
+  showToast('⚠️ ' + msg, 5000);
+  setTimeout(() => {
+    document.getElementById('gameOverOverlay').classList.add('show');
+    document.getElementById('goIcon').textContent = '🚶';
+    document.getElementById('goTitle').textContent = 'Lawan Kabur!';
+    document.getElementById('goSub').textContent = msg;
+  }, 500);
+});
+
+socket.on('notYourTurn', () => showToast('⏳ Bukan giliran kamu!'));
+socket.on('error', ({ msg }) => showToast('❌ ' + msg));
+</script>
+</body>
+</html>
