@@ -12,39 +12,35 @@ const io = new Server(server, {
 app.use(express.static(path.join(__dirname, '..')));
 
 // ─── Game Constants ───────────────────────────────────────────────────────────
-const STARTING_COINS = 100;
-const HAND_SIZE = 5;
+const STARTING_HAND = 5;
+const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+const SUITS = ['♠','♥','♦','♣'];
+const SUIT_ORDER = { '♣': 1, '♦': 2, '♥': 3, '♠': 4, '🃏': 5 };
 
-const CARD_TYPES = [
-  // Attack cards
-  { id: 'slash',      name: 'Tebasan',     type: 'attack',  power: 15, cost: 10, desc: 'Serang musuh dengan tebasan pedang.' },
-  { id: 'fireball',   name: 'Bola Api',    type: 'attack',  power: 25, cost: 18, desc: 'Lempar bola api ke musuh.' },
-  { id: 'lightning',  name: 'Petir',       type: 'attack',  power: 35, cost: 25, desc: 'Hantam musuh dengan petir.' },
-  { id: 'poison',     name: 'Racun',       type: 'attack',  power: 12, cost: 8,  desc: 'Racuni musuh, damage berkali-kali.' },
-  { id: 'arrow',      name: 'Panah',       type: 'attack',  power: 18, cost: 12, desc: 'Tembak panah tepat sasaran.' },
-  { id: 'bomb',       name: 'Bom',         type: 'attack',  power: 40, cost: 35, desc: 'Bom besar! Damage sangat tinggi.' },
-  { id: 'punch',      name: 'Tinju',       type: 'attack',  power: 10, cost: 6,  desc: 'Pukulan cepat dan murah.' },
-  { id: 'ice',        name: 'Es Beku',     type: 'attack',  power: 20, cost: 15, desc: 'Bekukan musuh dengan es.' },
-
-  // Defense cards
-  { id: 'shield',     name: 'Perisai',     type: 'defense', block: 20, cost: 12, desc: 'Blok serangan musuh.' },
-  { id: 'dodge',      name: 'Menghindar',  type: 'defense', block: 30, cost: 18, desc: 'Hindari serangan sepenuhnya.' },
-  { id: 'barrier',    name: 'Penghalang',  type: 'defense', block: 15, cost: 8,  desc: 'Buat penghalang magis.' },
-  { id: 'fortify',    name: 'Benteng',     type: 'defense', block: 40, cost: 28, desc: 'Pertahanan maksimal.' },
-
-  // Special cards
-  { id: 'steal',      name: 'Mencuri',     type: 'special', effect: 'steal',   cost: 20, desc: 'Curi 15 koin dari musuh.' },
-  { id: 'double',     name: 'Gandakan',    type: 'special', effect: 'double',  cost: 25, desc: 'Gandakan damage serangan berikutnya.' },
-  { id: 'heal',       name: 'Pulihkan',    type: 'special', effect: 'heal',    cost: 15, desc: 'Pulihkan 20 koin.' },
-  { id: 'mirror',     name: 'Cermin',      type: 'special', effect: 'mirror',  cost: 22, desc: 'Balikkan serangan musuh ke mereka.' },
-  { id: 'gamble',     name: 'Judi',        type: 'special', effect: 'gamble',  cost: 0,  desc: 'Taruh semua untuk peluang besar!' },
-];
+function rankToValue(rank) {
+  if (rank === 'J') return 11;
+  if (rank === 'Q') return 12;
+  if (rank === 'K') return 13;
+  if (rank === 'A') return 14;
+  return parseInt(rank, 10);
+}
 
 function createDeck() {
   const deck = [];
-  for (let i = 0; i < 4; i++) {
-    CARD_TYPES.forEach(c => deck.push({ ...c }));
-  }
+  RANKS.forEach(rank => {
+    SUITS.forEach(suit => {
+      deck.push({
+        id: `${rank}${suit}`,
+        name: `${rank}${suit}`,
+        rank,
+        suit,
+        value: rankToValue(rank),
+        type: 'standard'
+      });
+    });
+  });
+  deck.push({ id: 'JOKER1', name: 'Joker 🃏', rank: 'JK', suit: '🃏', value: 15, type: 'joker' });
+  deck.push({ id: 'JOKER2', name: 'Joker 🃏', rank: 'JK', suit: '🃏', value: 15, type: 'joker' });
   return shuffle(deck);
 }
 
@@ -69,28 +65,24 @@ const rooms = {};
 const playerRoom = {};
 
 function createRoom(roomId) {
-  const deck1 = createDeck();
-  const deck2 = createDeck();
-  const hand1 = [], hand2 = [];
-  drawCards(deck1, hand1, HAND_SIZE);
-  drawCards(deck2, hand2, HAND_SIZE);
+  const deck = createDeck();
+  const hand1 = [];
+  const hand2 = [];
+  drawCards(deck, hand1, STARTING_HAND);
+  drawCards(deck, hand2, STARTING_HAND);
 
   return {
     id: roomId,
-    players: [],          // [socketId, socketId]
-    names: {},            // socketId -> name
-    coins: {},            // socketId -> amount
-    hands: {},            // socketId -> cards[]
-    decks: {},            // socketId -> deck[]
-    pendingAttack: {},    // socketId -> power
-    doubleNext: {},       // socketId -> bool
-    mirrorActive: {},     // socketId -> bool
-    turn: null,           // socketId whose turn it is
-    round: 0,
-    phase: 'waiting',     // waiting | playing | gameover
-    playedCard: {},       // last played card per player
-    betAmount: {},        // bet per player this round
-    roundBet: 0,          // total bet in the pot this round
+    players: [],
+    names: {},
+    hands: {},
+    deck,
+    scores: {},
+    currentTrick: {},
+    lastTrick: null,
+    turn: null,
+    round: 1,
+    phase: 'waiting',
     log: []
   };
 }
@@ -110,19 +102,23 @@ function gameState(room, forPlayer) {
     myId: forPlayer,
     oppId: opp,
     myName: room.names[forPlayer],
-    oppName: room.names[opp],
-    myCoins: room.coins[forPlayer],
-    oppCoins: room.coins[opp],
+    oppName: opp ? room.names[opp] : 'Menunggu...',
+    myScore: room.scores[forPlayer] || 0,
+    oppScore: opp ? room.scores[opp] || 0 : 0,
     myHand: room.hands[forPlayer],
     oppHandCount: opp ? room.hands[opp].length : 0,
     turn: room.turn,
     round: room.round,
     phase: room.phase,
-    myPlayedCard: room.playedCard[forPlayer],
-    oppPlayedCard: room.playedCard[opp],
-    doubleActive: room.doubleNext[forPlayer],
-    mirrorActive: room.mirrorActive[forPlayer],
-    roundBet: room.roundBet,
+    myPlayedCard: room.currentTrick[forPlayer],
+    oppPlayedCard: opp ? room.currentTrick[opp] : null,
+    lastTrick: room.lastTrick
+      ? {
+          ...room.lastTrick,
+          winnerName: room.lastTrick.winner ? room.names[room.lastTrick.winner] : null
+        }
+      : null,
+    deckCount: room.deck.length,
     log: room.log
   };
 }
@@ -133,127 +129,99 @@ function broadcastState(room) {
   });
 }
 
-function endGame(room, winnerId) {
+function finishGame(room) {
   room.phase = 'gameover';
-  const loserId = getOpponent(room, winnerId);
-  addLog(room, `🏆 ${room.names[winnerId]} MENANG! ${room.names[loserId]} kehabisan koin!`);
-  room.players.forEach(pid => {
-    io.to(pid).emit('gameOver', {
-      winner: winnerId,
-      winnerName: room.names[winnerId],
-      loserName: room.names[loserId],
-      isWinner: pid === winnerId
+  const [first, second] = room.players;
+  const score1 = room.scores[first] || 0;
+  const score2 = room.scores[second] || 0;
+  let winner = null;
+
+  if (score1 > score2) winner = first;
+  else if (score2 > score1) winner = second;
+
+  if (winner) {
+    const loser = getOpponent(room, winner);
+    addLog(room, `🏆 ${room.names[winner]} menang permainan dengan skor ${room.scores[winner]}:${room.scores[loser]}!`);
+    room.players.forEach(pid => {
+      io.to(pid).emit('gameOver', {
+        winner,
+        winnerName: room.names[winner],
+        loserName: room.names[loser],
+        isWinner: pid === winner,
+        draw: false
+      });
     });
-  });
+  } else {
+    addLog(room, `🤝 Permainan berakhir seri ${score1}:${score2}.`);
+    room.players.forEach(pid => {
+      io.to(pid).emit('gameOver', {
+        draw: true,
+        message: `Permainan berakhir seri ${score1}:${score2}.`
+      });
+    });
+  }
 }
 
-function resolveCard(room, playerId, card, betAmt) {
+function resolveTrick(room) {
+  const [first, second] = room.players;
+  const card1 = room.currentTrick[first];
+  const card2 = room.currentTrick[second];
+  let winner = null;
+  let resultMsg = '';
+
+  if (card1.value > card2.value) winner = first;
+  else if (card2.value > card1.value) winner = second;
+  else {
+    if (card1.value === 15 && card2.value === 15) {
+      winner = null;
+    } else {
+      if (SUIT_ORDER[card1.suit] > SUIT_ORDER[card2.suit]) winner = first;
+      else if (SUIT_ORDER[card2.suit] > SUIT_ORDER[card1.suit]) winner = second;
+      else winner = null;
+    }
+  }
+
+  if (winner) {
+    room.scores[winner] = (room.scores[winner] || 0) + 1;
+    const winningCard = winner === first ? card1 : card2;
+    resultMsg = `🏆 ${room.names[winner]} menang trik dengan ${winningCard.name}!`;
+  } else {
+    resultMsg = `🤝 Trik seri antara ${room.names[first]} dan ${room.names[second]}!`;
+  }
+
+  room.lastTrick = { card1, card2, winner };
+  room.currentTrick = {};
+  room.round += 1;
+
+  addLog(room, resultMsg);
+
+  if (room.hands[first].length === 0 && room.hands[second].length === 0) {
+    finishGame(room);
+    return;
+  }
+
+  if (winner) {
+    room.turn = winner;
+  } else {
+    room.turn = room.players[Math.random() < 0.5 ? 0 : 1];
+  }
+
+  broadcastState(room);
+}
+
+function resolveCard(room, playerId, card) {
   const opp = getOpponent(room, playerId);
   if (!opp) return;
 
-  let resultMsg = '';
+  room.currentTrick[playerId] = card;
+  addLog(room, `🃏 ${room.names[playerId]} memainkan ${card.name}`);
 
-  // Deduct bet first
-  room.coins[playerId] = Math.max(0, room.coins[playerId] - betAmt);
-  room.coins[opp] = Math.max(0, room.coins[opp] - betAmt);
-  room.roundBet += betAmt * 2;
-
-  if (card.type === 'attack') {
-    let dmg = card.power;
-    if (room.doubleNext[playerId]) { dmg *= 2; room.doubleNext[playerId] = false; }
-
-    if (room.mirrorActive[opp]) {
-      // Mirror: reflect damage back to attacker
-      room.coins[playerId] = Math.max(0, room.coins[playerId] - dmg);
-      room.mirrorActive[opp] = false;
-      resultMsg = `🪞 ${room.names[opp]} memantulkan serangan! ${room.names[playerId]} kena ${dmg} damage!`;
-    } else {
-      room.pendingAttack[opp] = (room.pendingAttack[opp] || 0) + dmg;
-      resultMsg = `⚔️ ${room.names[playerId]} menyerang dengan ${card.name} (${dmg} power)!`;
-    }
-
-  } else if (card.type === 'defense') {
-    const incoming = room.pendingAttack[playerId] || 0;
-    const blocked = Math.min(incoming, card.block);
-    const remaining = incoming - blocked;
-    room.coins[playerId] = Math.max(0, room.coins[playerId] - remaining);
-    room.pendingAttack[playerId] = 0;
-
-    // Winner of round gets the pot
-    if (blocked >= incoming && incoming > 0) {
-      room.coins[playerId] += room.roundBet;
-      resultMsg = `🛡️ ${room.names[playerId]} memblok serangan! Menang ronde, dapat ${room.roundBet} koin!`;
-      room.roundBet = 0;
-    } else {
-      resultMsg = `🛡️ ${room.names[playerId]} memblok ${blocked} dari ${incoming} damage. Sisa ${remaining} kena!`;
-    }
-
-  } else if (card.type === 'special') {
-    switch (card.effect) {
-      case 'steal':
-        const stolen = Math.min(15, room.coins[opp]);
-        room.coins[opp] -= stolen;
-        room.coins[playerId] += stolen;
-        resultMsg = `💰 ${room.names[playerId]} mencuri ${stolen} koin dari ${room.names[opp]}!`;
-        break;
-      case 'double':
-        room.doubleNext[playerId] = true;
-        resultMsg = `✨ ${room.names[playerId]} mengaktifkan Gandakan! Serangan berikutnya 2x!`;
-        break;
-      case 'heal':
-        room.coins[playerId] += 20;
-        resultMsg = `💚 ${room.names[playerId]} memulihkan 20 koin!`;
-        break;
-      case 'mirror':
-        room.mirrorActive[playerId] = true;
-        resultMsg = `🪞 ${room.names[playerId]} siap memantulkan serangan berikutnya!`;
-        break;
-      case 'gamble':
-        const roll = Math.random();
-        if (roll > 0.45) {
-          const pot = Math.floor(room.coins[opp] * 0.3);
-          room.coins[opp] -= pot;
-          room.coins[playerId] += pot;
-          resultMsg = `🎲 JUDI BERHASIL! ${room.names[playerId]} menang ${pot} koin dari ${room.names[opp]}!`;
-        } else {
-          const lose = Math.floor(room.coins[playerId] * 0.3);
-          room.coins[playerId] -= lose;
-          room.coins[opp] += lose;
-          resultMsg = `🎲 JUDI GAGAL! ${room.names[playerId]} kehilangan ${lose} koin!`;
-        }
-        break;
-    }
-  }
-
-  // Apply unblocked attack at end of turn if no defense played
-  if (card.type !== 'defense' && room.pendingAttack[opp]) {
-    // Attack waits for next turn's defense
-  }
-
-  addLog(room, resultMsg);
-  room.playedCard[playerId] = card;
-
-  // Draw a new card
-  drawCards(room.decks[playerId], room.hands[playerId], 1);
-
-  // Check for game over
-  const coins1 = room.coins[room.players[0]];
-  const coins2 = room.coins[room.players[1]];
-
-  if (coins1 <= 0 && coins2 <= 0) {
-    addLog(room, '💀 Dua-duanya bangkrut! Seri!');
-    room.phase = 'gameover';
-    room.players.forEach(pid => io.to(pid).emit('gameOver', { draw: true }));
+  if (!room.currentTrick[opp]) {
+    broadcastState(room);
     return;
   }
-  if (coins1 <= 0) return endGame(room, room.players[1]);
-  if (coins2 <= 0) return endGame(room, room.players[0]);
 
-  // Switch turn
-  room.turn = opp;
-  room.round++;
-
-  broadcastState(room);
+  resolveTrick(room);
 }
 
 // ─── Socket Events ────────────────────────────────────────────────────────────
@@ -278,14 +246,9 @@ io.on('connection', (socket) => {
 
     room.players.push(socket.id);
     room.names[socket.id] = name;
-    room.coins[socket.id] = STARTING_COINS;
+    room.scores[socket.id] = 0;
     room.hands[socket.id] = [];
-    room.decks[socket.id] = createDeck();
-    room.doubleNext[socket.id] = false;
-    room.mirrorActive[socket.id] = false;
-    room.pendingAttack[socket.id] = 0;
-    room.betAmount[socket.id] = 0;
-    drawCards(room.decks[socket.id], room.hands[socket.id], HAND_SIZE);
+    drawCards(room.deck, room.hands[socket.id], STARTING_HAND);
 
     playerRoom[socket.id] = roomId;
     socket.join(roomId);
@@ -302,7 +265,7 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('playCard', ({ cardId, bet }) => {
+  socket.on('playCard', ({ cardId }) => {
     const roomId = playerRoom[socket.id];
     if (!roomId) return;
     const room = rooms[roomId];
@@ -319,21 +282,8 @@ io.on('connection', (socket) => {
       return;
     }
 
-    const card = hand[cardIdx];
-    const betAmt = Math.max(0, Math.min(parseInt(bet) || 0, room.coins[socket.id]));
-
-    if (room.coins[socket.id] < card.cost) {
-      socket.emit('error', { msg: `Koin tidak cukup! Butuh ${card.cost} koin.` });
-      return;
-    }
-
-    // Deduct card cost
-    room.coins[socket.id] -= card.cost;
-
-    // Remove card from hand
-    hand.splice(cardIdx, 1);
-
-    resolveCard(room, socket.id, card, betAmt);
+    const card = hand.splice(cardIdx, 1)[0];
+    resolveCard(room, socket.id, card);
   });
 
   socket.on('disconnect', () => {
@@ -354,33 +304,25 @@ io.on('connection', (socket) => {
   });
 
   socket.on('rematch', ({ roomId }) => {
-    // Reset room for rematch
     const room = rooms[roomId];
     if (!room || room.players.length < 2) return;
 
-    room.coins = {};
+    room.deck = createDeck();
     room.hands = {};
-    room.decks = {};
-    room.pendingAttack = {};
-    room.doubleNext = {};
-    room.mirrorActive = {};
-    room.playedCard = {};
-    room.roundBet = 0;
-    room.round = 0;
+    room.scores = {};
+    room.currentTrick = {};
+    room.lastTrick = null;
+    room.round = 1;
+    room.phase = 'playing';
     room.log = [];
 
     room.players.forEach(pid => {
-      room.coins[pid] = STARTING_COINS;
+      room.scores[pid] = 0;
       room.hands[pid] = [];
-      room.decks[pid] = createDeck();
-      room.doubleNext[pid] = false;
-      room.mirrorActive[pid] = false;
-      room.pendingAttack[pid] = 0;
-      drawCards(room.decks[pid], room.hands[pid], HAND_SIZE);
+      drawCards(room.deck, room.hands[pid], STARTING_HAND);
     });
 
-    room.turn = room.players[Math.floor(Math.random() * 2)];
-    room.phase = 'playing';
+    room.turn = room.players[Math.random() < 0.5 ? 0 : 1];
     addLog(room, `🔄 Rematch dimulai! ${room.names[room.turn]} mulai duluan!`);
     broadcastState(room);
   });

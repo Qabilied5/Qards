@@ -318,44 +318,12 @@
     margin-bottom: 0.75rem;
   }
 
-  .bet-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-    flex-wrap: wrap;
-  }
-
-  .bet-label {
-    font-family: 'Cinzel', serif;
-    font-size: 0.75rem;
-    color: var(--muted);
-  }
-
-  .bet-input {
-    background: rgba(0,0,0,0.4);
-    border: 1px solid var(--gold-dark);
-    border-radius: 6px;
-    padding: 0.3rem 0.6rem;
-    color: var(--coin);
-    font-family: 'Cinzel', serif;
+  .hand-info {
+    font-family: 'Crimson Text', serif;
     font-size: 0.9rem;
-    width: 80px;
-    text-align: center;
-    outline: none;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
   }
-
-  .bet-btn {
-    background: rgba(212,168,67,0.1);
-    border: 1px solid var(--gold-dark);
-    border-radius: 4px;
-    color: var(--gold);
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    cursor: pointer;
-    font-family: 'Cinzel', serif;
-  }
-  .bet-btn:hover { background: rgba(212,168,67,0.2); }
 
   .cards-grid {
     display: grid;
@@ -371,38 +339,35 @@
     transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
     position: relative;
     overflow: hidden;
-    border: 1px solid transparent;
+    border: 1px solid rgba(255,255,255,0.06);
   }
 
-  .card.attack  { border-color: rgba(192,57,43,0.4); }
-  .card.defense { border-color: rgba(26,107,138,0.4); }
-  .card.special { border-color: rgba(123,45,139,0.4); }
+  .card.joker { border-color: rgba(212,168,67,0.5); }
+  .card.standard { border-color: rgba(255,255,255,0.12); }
 
   .card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.5);
   }
 
-  .card.attack:hover  { border-color: var(--attack);  box-shadow: 0 8px 20px rgba(192,57,43,0.3); }
-  .card.defense:hover { border-color: var(--defense); box-shadow: 0 8px 20px rgba(26,107,138,0.3); }
-  .card.special:hover { border-color: var(--special); box-shadow: 0 8px 20px rgba(123,45,139,0.3); }
+  .card.joker:hover  { border-color: var(--gold);  box-shadow: 0 8px 20px rgba(212,168,67,0.3); }
+  .card.standard:hover { border-color: rgba(255,255,255,0.25); }
 
   .card.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
 
   .card-type-badge {
     font-family: 'Cinzel', serif;
-    font-size: 0.55rem;
+    font-size: 0.65rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    padding: 0.15rem 0.4rem;
+    padding: 0.2rem 0.45rem;
     border-radius: 20px;
     margin-bottom: 0.4rem;
     display: inline-block;
   }
 
-  .card.attack  .card-type-badge { background: rgba(192,57,43,0.25); color: #e87c7c; }
-  .card.defense .card-type-badge { background: rgba(26,107,138,0.25); color: #7cc4e8; }
-  .card.special .card-type-badge { background: rgba(123,45,139,0.25); color: #c87ce8; }
+  .card.joker  .card-type-badge { background: rgba(212,168,67,0.25); color: var(--gold); }
+  .card.standard .card-type-badge { background: rgba(255,255,255,0.08); color: var(--text); }
 
   .card-name {
     font-family: 'Cinzel', serif;
@@ -612,8 +577,8 @@
     <div class="player-panel" id="oppPanel">
       <div class="player-name" id="oppName">Lawan</div>
       <div class="coins-display">
-        <span class="coin-icon">🪙</span>
-        <span id="oppCoins">100</span>
+        <span class="coin-icon">🏆</span>
+        <span id="oppScore">0</span>
       </div>
       <div class="coins-bar"><div class="coins-fill" id="oppCoinBar" style="width:100%"></div></div>
       <div class="opp-hand-count" id="oppHandDisplay" style="margin-top:0.75rem;"></div>
@@ -623,7 +588,7 @@
     <div class="center-area">
       <div class="vs-text">VS</div>
       <div class="pot-display">
-        🏺 Pot: <span id="potDisplay">0</span>
+        🧾 Sisa Deck: <span id="deckCount">44</span>
       </div>
       <div class="played-cards" id="playedCards"></div>
     </div>
@@ -632,8 +597,8 @@
     <div class="player-panel me" id="myPanel">
       <div class="player-name" id="myName">Kamu</div>
       <div class="coins-display">
-        <span class="coin-icon">🪙</span>
-        <span id="myCoins">100</span>
+        <span class="coin-icon">🏆</span>
+        <span id="myScore">0</span>
       </div>
       <div class="coins-bar"><div class="coins-fill" id="myCoinBar" style="width:100%"></div></div>
       <div id="turnIndicator" class="turn-indicator" style="margin-top:0.5rem;"></div>
@@ -643,14 +608,7 @@
   <!-- Hand -->
   <div class="hand-section">
     <div class="section-title">🃏 Kartu di Tangan</div>
-    <div class="bet-row">
-      <span class="bet-label">💰 Taruhan:</span>
-      <input class="bet-input" id="betInput" type="number" min="0" value="0" placeholder="0">
-      <button class="bet-btn" onclick="setBet(5)">+5</button>
-      <button class="bet-btn" onclick="setBet(10)">+10</button>
-      <button class="bet-btn" onclick="setBet(25)">+25</button>
-      <button class="bet-btn" onclick="document.getElementById('betInput').value=0">Reset</button>
-    </div>
+    <div class="hand-info">Pilih kartu untuk menyelesaikan trik. Kartu terbaik menang.</div>
     <div class="cards-grid" id="handGrid"></div>
   </div>
 
@@ -680,7 +638,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
-let myId = null, currentRoomId = null, myCoinsMax = 100, oppCoinsMax = 100;
+let myId = null, currentRoomId = null;
 
 // ── Helpers ──────────────────────────────────────────────────
 function showToast(msg, duration = 2500) {
@@ -688,11 +646,6 @@ function showToast(msg, duration = 2500) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), duration);
-}
-
-function setBet(amt) {
-  const inp = document.getElementById('betInput');
-  inp.value = parseInt(inp.value || 0) + amt;
 }
 
 function genRoomCode() {
@@ -715,33 +668,27 @@ function joinRoom() {
 
 // ── Render ───────────────────────────────────────────────────
 function renderState(s) {
-  myCoinsMax = Math.max(myCoinsMax, s.myCoins);
-  oppCoinsMax = Math.max(oppCoinsMax, s.oppCoins);
-
   document.getElementById('myName').textContent = '🧙 ' + s.myName;
   document.getElementById('oppName').textContent = '👺 ' + s.oppName;
-  document.getElementById('myCoins').textContent = s.myCoins;
-  document.getElementById('oppCoins').textContent = s.oppCoins;
-  document.getElementById('roundBadge').textContent = 'RONDE ' + s.round;
-  document.getElementById('potDisplay').textContent = s.roundBet;
+  document.getElementById('myScore').textContent = s.myScore;
+  document.getElementById('oppScore').textContent = s.oppScore;
+  document.getElementById('roundBadge').textContent = 'TRIK ' + s.round;
+  document.getElementById('deckCount').textContent = s.deckCount;
   document.getElementById('roomBadge').textContent = '🏠 ' + currentRoomId;
 
-  const myPct = Math.max(0, (s.myCoins / Math.max(myCoinsMax, 100)) * 100);
-  const oppPct = Math.max(0, (s.oppCoins / Math.max(oppCoinsMax, 100)) * 100);
+  const myPct = Math.min(100, (s.myHand.length / 5) * 100);
+  const oppPct = Math.min(100, (s.oppHandCount / 5) * 100);
   document.getElementById('myCoinBar').style.width = myPct + '%';
   document.getElementById('oppCoinBar').style.width = oppPct + '%';
 
-  // Turn indicator
   const ind = document.getElementById('turnIndicator');
   const isMyTurn = s.turn === myId;
   ind.className = 'turn-indicator ' + (isMyTurn ? 'your-turn' : 'opp-turn');
   ind.textContent = isMyTurn ? '⚡ Giliran Kamu!' : '⏳ Giliran Lawan';
 
-  // Panel highlights
   document.getElementById('myPanel').className = 'player-panel me' + (isMyTurn ? ' active' : '');
   document.getElementById('oppPanel').className = 'player-panel' + (!isMyTurn ? ' active' : '');
 
-  // Opp hand display
   const ohd = document.getElementById('oppHandDisplay');
   ohd.innerHTML = '';
   for (let i = 0; i < s.oppHandCount; i++) {
@@ -751,64 +698,60 @@ function renderState(s) {
     ohd.appendChild(cb);
   }
 
-  // Played cards
   const pc = document.getElementById('playedCards');
   pc.innerHTML = '';
-  if (s.oppPlayedCard) {
-    pc.innerHTML += `<div class="played-mini-card">👺 ${s.oppPlayedCard.name}</div>`;
-  }
-  if (s.myPlayedCard) {
-    pc.innerHTML += `<div class="played-mini-card">🧙 ${s.myPlayedCard.name}</div>`;
+  if (s.lastTrick) {
+    const winnerDisplay = s.lastTrick.winner
+      ? (s.lastTrick.winner === s.myId ? s.myName : s.oppName)
+      : 'Seri';
+    pc.innerHTML = `
+      <div class="played-mini-card">👑 ${winnerDisplay} menang trik</div>
+      <div class="played-mini-card">${s.lastTrick.card1.name} vs ${s.lastTrick.card2.name}</div>
+    `;
+  } else {
+    if (s.oppPlayedCard) pc.innerHTML += `<div class="played-mini-card">👺 ${s.oppPlayedCard.name}</div>`;
+    if (s.myPlayedCard)  pc.innerHTML += `<div class="played-mini-card">🧙 ${s.myPlayedCard.name}</div>`;
   }
 
-  // Hand
   const grid = document.getElementById('handGrid');
   grid.innerHTML = '';
   const disabled = !isMyTurn || s.phase !== 'playing';
 
   s.myHand.forEach(card => {
-    const canAfford = s.myCoins >= card.cost;
     const div = document.createElement('div');
-    div.className = `card ${card.type}${disabled || !canAfford ? ' disabled' : ''}`;
+    div.className = `card ${card.type}${disabled ? ' disabled' : ''}`;
     div.onclick = () => playCard(card.id);
 
-    let statHtml = '';
-    if (card.type === 'attack')  statHtml = `<span class="stat-power">⚔️ ${card.power}</span>`;
-    if (card.type === 'defense') statHtml = `<span class="stat-block">🛡️ ${card.block}</span>`;
-    if (card.type === 'special') statHtml = `<span style="color:#c87ce8">✨ Efek</span>`;
+    const statValue = card.type === 'joker' ? 'Joker' : card.rank;
+    const statText = card.type === 'joker'
+      ? '🃏 Wild'
+      : `${card.suit} ${card.rank}`;
 
     div.innerHTML = `
       <div class="card-glow"></div>
-      <div class="card-type-badge">${card.type === 'attack' ? '⚔️ Serang' : card.type === 'defense' ? '🛡️ Bertahan' : '✨ Spesial'}</div>
+      <div class="card-type-badge">${card.type === 'joker' ? '🃏 Joker' : '🂠 Kartu'}</div>
       <div class="card-name">${card.name}</div>
-      <div class="card-desc">${card.desc}</div>
+      <div class="card-desc">${card.type === 'joker' ? 'Kartu istimewa, unggul pada trik apa pun.' : 'Kartu standar untuk trik.'}</div>
       <div class="card-stats">
-        ${statHtml}
-        <span class="stat-cost">🪙 ${card.cost}</span>
+        <span class="stat-power">${statText}</span>
+        <span class="stat-cost">${statValue}</span>
       </div>
     `;
     grid.appendChild(div);
   });
 
-  // Log
   const bl = document.getElementById('battleLog');
   bl.innerHTML = '';
-  (s.log || []).forEach((entry, i) => {
+  (s.log || []).forEach(entry => {
     const d = document.createElement('div');
     d.className = 'log-entry';
-    d.textContent = entry.msg;
+    d.textContent = entry.msg || entry;
     bl.appendChild(d);
   });
-
-  // Status badges
-  if (s.doubleActive) showToast('✨ Kartu Gandakan aktif!', 1500);
-  if (s.mirrorActive) showToast('🪞 Kartu Cermin aktif!', 1500);
 }
 
 function playCard(cardId) {
-  const bet = parseInt(document.getElementById('betInput').value) || 0;
-  socket.emit('playCard', { cardId, bet });
-  document.getElementById('betInput').value = 0;
+  socket.emit('playCard', { cardId });
 }
 
 function requestRematch() {
@@ -843,20 +786,20 @@ socket.on('gameState', (s) => {
   renderState(s);
 });
 
-socket.on('gameOver', ({ winner, winnerName, loserName, isWinner, draw }) => {
+socket.on('gameOver', ({ winner, winnerName, loserName, isWinner, draw, message }) => {
   const overlay = document.getElementById('gameOverOverlay');
   if (draw) {
     document.getElementById('goIcon').textContent = '🤝';
     document.getElementById('goTitle').textContent = 'Seri!';
-    document.getElementById('goSub').textContent = 'Dua-duanya kehabisan koin!';
+    document.getElementById('goSub').textContent = message || 'Permainan berakhir seri.';
   } else if (isWinner) {
     document.getElementById('goIcon').textContent = '🏆';
     document.getElementById('goTitle').textContent = 'KAMU MENANG!';
-    document.getElementById('goSub').textContent = `${loserName} kehabisan koin. Kamu juaranya!`;
+    document.getElementById('goSub').textContent = `${winnerName} unggul dan kamu menang!`;
   } else {
     document.getElementById('goIcon').textContent = '💀';
     document.getElementById('goTitle').textContent = 'KAMU KALAH!';
-    document.getElementById('goSub').textContent = `${winnerName} mengalahkan kamu. Jangan menyerah!`;
+    document.getElementById('goSub').textContent = `${winnerName} mengalahkanmu dengan skor akhir.`;
   }
   overlay.classList.add('show');
 });
