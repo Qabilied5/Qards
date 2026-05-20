@@ -1,7 +1,7 @@
 {
-  "name": "card-battle-game",
+  "name": "colorpick-game",
   "version": "1.0.0",
-  "description": "2 Player Card Battle Game with Socket.IO",
+  "description": "2-player color picking accuracy game",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
