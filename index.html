@@ -1178,20 +1178,19 @@
         <div class="how-step">
           <div class="step-num">01</div>
           <div class="step-text">
-            You're shown a random target color. Match it as closely as possible.
+            A target color is shown for 10 seconds. Memorize it carefully — it will disappear!
           </div>
         </div>
         <div class="how-step">
           <div class="step-num">02</div>
           <div class="step-text">
-            Submit first to get a speed bonus — but only if accuracy is above
-            50%.
+            Once hidden, recreate the color from memory using RGB sliders. No peeking!
           </div>
         </div>
         <div class="how-step">
           <div class="step-num">03</div>
           <div class="step-text">
-            Both picks revealed simultaneously. Best accuracy wins the round.
+            Submit first for a speed bonus. Best memory wins the round!
           </div>
         </div>
       </div>
@@ -1251,10 +1250,10 @@
 
           <!-- Target -->
           <div class="target-panel">
-            <div class="target-label">TARGET COLOR</div>
-            <div class="target-swatch" id="target-swatch"></div>
-            <div class="target-hex" id="target-hex">#------</div>
-            <div class="target-rgb" id="target-rgb">R:--- G:--- B:---</div>
+            <div class="target-label" id="target-label-text">TARGET COLOR</div>
+            <div class="target-swatch" id="target-swatch" style="transition: background 0.3s, opacity 0.5s;"></div>
+            <div class="target-hex" id="target-hex" style="transition: opacity 0.5s;">#------</div>
+            <div class="target-rgb" id="target-rgb" style="transition: opacity 0.5s;">R:--- G:--- B:---</div>
           </div>
 
           <!-- Picker -->
@@ -1554,30 +1553,38 @@
         }
       });
 
-      socket.on("round_start", ({ round, maxRounds, targetColor, scores }) => {
+      let memorizeTimer = null;
+      let memorizeInterval = null;
+
+      socket.on("memorize_start", ({ round, maxRounds, targetColor, scores, memorizeSeconds }) => {
         hasSubmitted = false;
         opponentSubmitted = false;
-        roundStartTime = Date.now();
 
         // Reset UI
-        document.getElementById("submit-btn").disabled = false;
+        document.getElementById("submit-btn").disabled = true;
         document.getElementById("submitted-overlay").classList.remove("visible");
         document.getElementById("my-dot").className = "status-dot waiting-submit";
         document.getElementById("opp-dot").className = "status-dot waiting-submit";
-        document.getElementById("my-status-text").textContent = "YOU — PICKING";
-        document.getElementById("opp-status-text").textContent = "OPP — PICKING";
+        document.getElementById("my-status-text").textContent = "YOU — MEMORIZING";
+        document.getElementById("opp-status-text").textContent = "OPP — MEMORIZING";
 
         // Update scores
         updateScores(scores);
 
-        // Set target
+        // Show target color info
         const hex = targetColor.hex;
         document.getElementById("target-swatch").style.background = hex;
         document.getElementById("target-hex").textContent = hex;
         document.getElementById("target-rgb").textContent = `R:${targetColor.r} G:${targetColor.g} B:${targetColor.b}`;
+        document.getElementById("target-swatch").style.opacity = "1";
+        document.getElementById("target-hex").style.opacity = "1";
+        document.getElementById("target-rgb").style.opacity = "1";
         document.getElementById("round-display").textContent = `${round} / ${maxRounds}`;
 
-        // Random starting color
+        // Update target label to show memorize countdown
+        document.getElementById("target-label-text").textContent = `MEMORIZE — ${memorizeSeconds}s`;
+
+        // Random starting color for picker (hidden/disabled)
         const sr = Math.floor(Math.random() * 256);
         const sg = Math.floor(Math.random() * 256);
         const sb = Math.floor(Math.random() * 256);
@@ -1587,6 +1594,37 @@
         document.getElementById("result-overlay").classList.remove("visible");
 
         showScreen("game-screen");
+
+        // Client-side countdown display
+        let secsLeft = memorizeSeconds;
+        clearInterval(memorizeInterval);
+        memorizeInterval = setInterval(() => {
+          secsLeft--;
+          if (secsLeft > 0) {
+            document.getElementById("target-label-text").textContent = `MEMORIZE — ${secsLeft}s`;
+          } else {
+            clearInterval(memorizeInterval);
+          }
+        }, 1000);
+      });
+
+      socket.on("memorize_end", () => {
+        clearInterval(memorizeInterval);
+
+        // Hide the target color
+        document.getElementById("target-swatch").style.background = "#111111";
+        document.getElementById("target-swatch").style.opacity = "0.15";
+        document.getElementById("target-hex").style.opacity = "0";
+        document.getElementById("target-rgb").style.opacity = "0";
+        document.getElementById("target-label-text").textContent = "TARGET HIDDEN — RECALL!";
+
+        // Enable picker and submit
+        document.getElementById("submit-btn").disabled = false;
+        document.getElementById("my-status-text").textContent = "YOU — PICKING";
+        document.getElementById("opp-status-text").textContent = "OPP — PICKING";
+
+        roundStartTime = Date.now();
+        showToast("🎨 Color hidden! Match from memory!");
       });
 
       socket.on("player_submitted", ({ playerId, submissionOrder, totalPlayers }) => {

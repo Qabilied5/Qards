@@ -60,20 +60,31 @@ function createRoom(roomId) {
   };
 }
 
+const MEMORIZE_SECONDS = 10;
+
 function startRound(room) {
   room.targetColor = generateColor();
   room.submissions = {};
   room.submitOrder = [];
-  room.status = "playing";
-  room.roundStartTime = Date.now();
+  room.status = "memorizing";
   room.round++;
 
-  io.to(room.id).emit("round_start", {
+  // Phase 1: show target color for memorization
+  io.to(room.id).emit("memorize_start", {
     round: room.round,
     maxRounds: room.maxRounds,
     targetColor: room.targetColor,
     scores: room.scores,
+    memorizeSeconds: MEMORIZE_SECONDS,
   });
+
+  // Phase 2: hide color and start picking phase
+  setTimeout(() => {
+    if (!room || room.status !== "memorizing") return;
+    room.status = "playing";
+    room.roundStartTime = Date.now();
+    io.to(room.id).emit("memorize_end", {});
+  }, MEMORIZE_SECONDS * 1000);
 }
 
 function resolveRound(room) {
