@@ -614,6 +614,7 @@
       }
 
       .target-strip-hex {
+        display: none;
         font-family: var(--mono);
         font-size: 0.95rem;
         letter-spacing: 0.1em;
@@ -1342,7 +1343,7 @@
 
               <!-- Hex row -->
               <div class="hex-row">
-                <div class="hex-input-wrap">
+                <div class="hex-input-wrap" disable>
                   <span class="hex-prefix">#</span>
                   <input type="text" class="hex-input" id="hex-text-input" maxlength="6" placeholder="808080" autocomplete="off" />
                 </div>
