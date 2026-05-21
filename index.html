@@ -473,6 +473,7 @@
       }
 
       .reveal-hex {
+        display: none;
         font-family: var(--mono);
         font-size: clamp(1.6rem, 7vw, 2.5rem);
         letter-spacing: 0.2em;
@@ -1343,9 +1344,9 @@
 
               <!-- Hex row -->
               <div class="hex-row">
-                <div class="hex-input-wrap" disable>
+                <div class="hex-input-wrap">
                   <span class="hex-prefix">#</span>
-                  <input type="text" class="hex-input" id="hex-text-input" maxlength="6" placeholder="808080" autocomplete="off" />
+                  <input type="text" class="hex-input" id="hex-text-input" maxlength="6" placeholder="808080" autocomplete="off" disabled/>
                 </div>
                 <button class="btn-eyedrop" title="Open color picker">
                   🎨
