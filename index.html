@@ -468,6 +468,296 @@
         backdrop-filter: blur(12px);
       }
       .toast.show { opacity: 1; transform: translateY(0); }
+
+      /* ===== SCREEN TRANSITIONS ===== */
+      .screen {
+        opacity: 0;
+        transform: translateY(16px);
+        transition: opacity 0.45s cubic-bezier(0.16,1,0.3,1), transform 0.45s cubic-bezier(0.16,1,0.3,1);
+      }
+      .screen.active {
+        opacity: 1;
+        transform: translateY(0);
+        animation: screenIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
+      }
+      @keyframes screenIn {
+        from { opacity: 0; transform: translateY(20px) scale(0.99); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      /* ===== STAGGER LOBBY CHILDREN ===== */
+      #lobby-screen .hero-block { animation: slideUp 0.55s 0.05s cubic-bezier(0.16,1,0.3,1) both; }
+      #lobby-screen .lobby-card { animation: slideUp 0.55s 0.15s cubic-bezier(0.16,1,0.3,1) both; }
+      #lobby-screen .how-to     { animation: slideUp 0.55s 0.25s cubic-bezier(0.16,1,0.3,1) both; }
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(24px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /* ===== WAITING SCREEN STAGGER ===== */
+      #waiting-screen .room-code-label { animation: slideUp 0.5s 0.05s cubic-bezier(0.16,1,0.3,1) both; }
+      #waiting-screen .room-code       { animation: slideUp 0.5s 0.12s cubic-bezier(0.16,1,0.3,1) both; }
+      #waiting-screen .copy-hint       { animation: slideUp 0.5s 0.18s cubic-bezier(0.16,1,0.3,1) both; }
+      #waiting-screen .players-grid    { animation: slideUp 0.5s 0.25s cubic-bezier(0.16,1,0.3,1) both; }
+      #waiting-screen .waiting-msg     { animation: slideUp 0.5s 0.34s cubic-bezier(0.16,1,0.3,1) both; }
+
+      /* ===== PLAYER SLOT FILL ANIMATION ===== */
+      .player-slot { transition: border-color 0.4s, background 0.4s, transform 0.3s; }
+      .player-slot.filled { animation: slotFill 0.45s cubic-bezier(0.16,1,0.3,1); }
+      @keyframes slotFill {
+        0%   { transform: scale(0.94); opacity: 0.4; }
+        60%  { transform: scale(1.03); }
+        100% { transform: scale(1); opacity: 1; }
+      }
+
+      /* ===== PICKER PANEL — slide up when game starts ===== */
+      .picker-panel {
+        transform: translateY(100%);
+        opacity: 0;
+        transition: transform 0.55s cubic-bezier(0.16,1,0.3,1), opacity 0.45s ease;
+      }
+      .picker-panel.visible {
+        transform: translateY(0);
+        opacity: 1;
+      }
+
+      /* ===== SLIDER ROWS — stagger in ===== */
+      .slider-row {
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: opacity 0.4s, transform 0.4s;
+      }
+      .slider-row.anim-in { opacity: 1; transform: translateX(0); }
+      .slider-row:nth-child(1) { transition-delay: 0.1s; }
+      .slider-row:nth-child(2) { transition-delay: 0.18s; }
+      .slider-row:nth-child(3) { transition-delay: 0.26s; }
+
+      /* ===== GAME TOPBAR — drop in ===== */
+      .game-topbar {
+        transform: translateY(-100%);
+        opacity: 0;
+        transition: transform 0.5s 0.1s cubic-bezier(0.16,1,0.3,1), opacity 0.4s 0.1s ease;
+      }
+      .game-topbar.visible { transform: translateY(0); opacity: 1; }
+
+      /* ===== TARGET STRIP — slide in from left ===== */
+      .target-strip {
+        transform: translateX(-20px);
+        opacity: 0;
+        transition: transform 0.5s 0.2s cubic-bezier(0.16,1,0.3,1), opacity 0.4s 0.2s ease;
+      }
+      .target-strip.visible { transform: translateX(0); opacity: 1; }
+
+      /* ===== CANVAS HEX — pop in ===== */
+      .canvas-hex, .canvas-rgb {
+        opacity: 0;
+        transform: scale(0.85);
+        transition: opacity 0.4s 0.35s ease, transform 0.4s 0.35s cubic-bezier(0.16,1,0.3,1);
+      }
+      .canvas-hex.visible, .canvas-rgb.visible { opacity: 1; transform: scale(1); }
+
+      /* ===== CANVAS RGB subtle delay ===== */
+      .canvas-rgb { transition-delay: 0.42s; }
+
+      /* ===== SCORE POINTS — animate value change ===== */
+      .score-pts { transition: color 0.3s, transform 0.2s; }
+      .score-pts.bump { animation: scoreBump 0.4s cubic-bezier(0.16,1,0.3,1); }
+      @keyframes scoreBump {
+        0%   { transform: scale(1); }
+        40%  { transform: scale(1.28); color: var(--accent); }
+        100% { transform: scale(1); }
+      }
+
+      /* ===== SUBMIT BUTTON — pulse when enabled ===== */
+      .btn-submit:not(:disabled) {
+        animation: btnPulse 2.2s ease-in-out infinite;
+      }
+      .btn-submit:not(:disabled):active { animation: none; }
+      @keyframes btnPulse {
+        0%, 100% { box-shadow: 0 4px 20px rgba(200,255,0,0.2); }
+        50%       { box-shadow: 0 4px 36px rgba(200,255,0,0.5), 0 0 0 4px rgba(200,255,0,0.1); }
+      }
+
+      /* ===== SUBMITTED OVERLAY — ripple in ===== */
+      .submitted-overlay.visible {
+        animation: rippleIn 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+      }
+      @keyframes rippleIn {
+        0%   { opacity: 0; backdrop-filter: blur(0px); }
+        100% { opacity: 1; backdrop-filter: blur(4px); }
+      }
+      .submitted-overlay span:first-child {
+        display: inline-block;
+        transition: transform 0.4s;
+      }
+      .submitted-overlay.visible span:first-child {
+        animation: checkBounce 0.6s 0.1s cubic-bezier(0.16,1,0.3,1) both;
+      }
+      @keyframes checkBounce {
+        0%   { transform: scale(0) rotate(-20deg); opacity: 0; }
+        60%  { transform: scale(1.3) rotate(5deg); }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
+      }
+
+      /* ===== RESULT OVERLAY ===== */
+      #result-overlay.visible {
+        animation: resultSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+      }
+      @keyframes resultSlideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /* Result elements stagger */
+      #result-overlay .result-label       { animation: none; }
+      #result-overlay.visible .result-label { animation: slideUp 0.45s 0.05s cubic-bezier(0.16,1,0.3,1) both; }
+      #result-overlay.visible .result-title { animation: resultTitle 0.55s 0.1s cubic-bezier(0.16,1,0.3,1) both; }
+      @keyframes resultTitle {
+        from { opacity: 0; transform: translateY(16px) scale(0.9); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      #result-overlay.visible .result-swatches { animation: slideUp 0.45s 0.2s cubic-bezier(0.16,1,0.3,1) both; }
+      #result-overlay.visible .result-cards    { animation: slideUp 0.45s 0.28s cubic-bezier(0.16,1,0.3,1) both; }
+      #result-overlay.visible .result-countdown{ animation: slideUp 0.45s 0.38s cubic-bezier(0.16,1,0.3,1) both; }
+
+      /* Swatch pop-in */
+      .result-swatch {
+        transform: scale(0);
+        transition: transform 0.5s cubic-bezier(0.16,1,0.3,1);
+      }
+      #result-overlay.visible .result-swatch { transform: scale(1); }
+      #result-overlay.visible .result-swatch.target { transition-delay: 0.3s; }
+      #result-overlay.visible .result-swatch.player { transition-delay: 0.38s; }
+
+      /* Result card entrance */
+      .result-card {
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity 0.4s, transform 0.4s cubic-bezier(0.16,1,0.3,1);
+      }
+      #result-overlay.visible .result-card:nth-child(1) { opacity: 1; transform: none; transition-delay: 0.32s; }
+      #result-overlay.visible .result-card:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.4s; }
+
+      /* Winner card glow pulse */
+      .result-card.winner-card::after {
+        content: '';
+        position: absolute; inset: 0;
+        border-radius: var(--radius);
+        box-shadow: 0 0 0 0 rgba(200,255,0,0.3);
+        animation: winnerGlow 2s ease-in-out infinite;
+      }
+      @keyframes winnerGlow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(200,255,0,0.2); }
+        50%       { box-shadow: 0 0 24px 4px rgba(200,255,0,0.12); }
+      }
+
+      /* ===== GAME OVER SCREEN ===== */
+      #gameover-screen .gameover-title  { animation: slideUp 0.6s 0.05s cubic-bezier(0.16,1,0.3,1) both; }
+      #gameover-screen .final-podium    { animation: slideUp 0.6s 0.18s cubic-bezier(0.16,1,0.3,1) both; }
+      #gameover-screen .gameover-btns   { animation: slideUp 0.6s 0.3s cubic-bezier(0.16,1,0.3,1) both; }
+
+      .podium-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      .podium-card:hover { transform: translateY(-4px); }
+      .podium-card.first { animation: podiumFirst 0.7s 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+      @keyframes podiumFirst {
+        0%  { opacity: 0; transform: scale(0.85) translateY(20px); }
+        60% { transform: scale(1.05); }
+        100%{ opacity: 1; transform: scale(1) translateY(0); }
+      }
+
+      /* ===== COLOR REVEAL — enhanced ===== */
+      #color-reveal { transition: opacity 0.4s ease; }
+      .reveal-memorize-text {
+        animation: revealTextPop 0.55s 0.15s cubic-bezier(0.16,1,0.3,1) both;
+      }
+      .reveal-hex {
+        animation: revealTextPop 0.55s 0.25s cubic-bezier(0.16,1,0.3,1) both;
+      }
+      .reveal-rgb {
+        animation: revealTextPop 0.55s 0.32s cubic-bezier(0.16,1,0.3,1) both;
+      }
+      .reveal-hint {
+        animation: revealTextPop 0.55s 0.4s cubic-bezier(0.16,1,0.3,1) both;
+      }
+      @keyframes revealTextPop {
+        from { opacity: 0; transform: translateY(12px) scale(0.96); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      /* ===== HEADER logo micro ===== */
+      .logo { cursor: default; transition: letter-spacing 0.3s; }
+      .logo:hover { letter-spacing: 0.14em; }
+
+      /* ===== CONN BADGE wiggle on connect ===== */
+      .conn-badge.connected { animation: connectedPop 0.4s cubic-bezier(0.16,1,0.3,1); }
+      @keyframes connectedPop {
+        0%   { transform: scale(0.85); }
+        60%  { transform: scale(1.1); }
+        100% { transform: scale(1); }
+      }
+
+      /* ===== TARGET STRIP STATE badge pulse ===== */
+      .target-strip-state.memorizing {
+        animation: badgePulse 1.8s ease-in-out infinite;
+      }
+      @keyframes badgePulse {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.55; }
+      }
+
+      /* ===== TOAST enhanced ===== */
+      .toast {
+        transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
+      }
+      .toast.show {
+        animation: toastSlide 0.38s cubic-bezier(0.16,1,0.3,1) both;
+      }
+      @keyframes toastSlide {
+        from { opacity: 0; transform: translateY(28px) scale(0.95); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      /* ===== ROUND CODE — copy flash ===== */
+      .room-code { transition: background 0.25s, transform 0.2s, color 0.25s; }
+      .room-code.copied { background: var(--accent-dim); color: var(--accent); transform: scale(0.97); }
+
+      /* ===== BTN PRIMARY — shimmer on hover ===== */
+      .btn-primary::after {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%; width: 60%; height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255,255,255,0.18), transparent);
+        transform: skewX(-20deg);
+        transition: left 0.55s;
+      }
+      .btn-primary:hover::after { left: 160%; }
+
+      /* ===== ACCURACY BAR animation ===== */
+      .accuracy-bar-fill { transition: width 0.8s 0.5s cubic-bezier(0.16,1,0.3,1); }
+
+      /* ===== STATUS DOT — submitted flash ===== */
+      .status-dot.submitted { animation: dotSubmit 0.4s cubic-bezier(0.16,1,0.3,1); }
+      @keyframes dotSubmit {
+        0%  { transform: scale(0); opacity: 0; }
+        60% { transform: scale(1.6); }
+        100%{ transform: scale(1); opacity: 1; }
+      }
+
+      /* ===== ROUND DISPLAY — flip on change ===== */
+      @keyframes roundFlip {
+        0%   { transform: rotateX(-60deg) scale(0.8); opacity: 0; }
+        100% { transform: rotateX(0deg) scale(1); opacity: 1; }
+      }
+      .round-num.flip { animation: roundFlip 0.4s cubic-bezier(0.16,1,0.3,1); }
+
+      /* ===== SCORE — flash on update ===== */
+      @keyframes scoreFlash {
+        0%   { background: rgba(200,255,0,0.25); border-radius: 6px; }
+        100% { background: transparent; }
+      }
+      .score-pts.flash { animation: scoreFlash 0.6s ease; }
     </style>
   </head>
   <body>
@@ -514,7 +804,7 @@
     <div class="screen active" id="lobby-screen">
       <div class="hero-block">
         <div class="hero-title">PICK THE<br/><em>EXACT</em><br/>COLOR</div>
-        <div class="hero-sub">2-player real-time color accuracy battle</div>
+        <div class="hero-sub">solo or 2-player real-time color accuracy battle</div>
       </div>
       <div class="lobby-card">
         <div class="form-group">
@@ -527,11 +817,17 @@
         </div>
         <button class="btn-primary" id="join-btn">JOIN ROOM</button>
         <button class="btn-secondary" id="create-btn">CREATE NEW ROOM</button>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:14px">
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+          <span style="font-family:var(--mono);font-size:0.55rem;color:var(--text-muted);letter-spacing:0.15em">OR</span>
+          <div style="flex:1;height:1px;background:var(--border)"></div>
+        </div>
+        <button class="btn-secondary" id="solo-btn" style="margin-top:0;border-color:var(--accent3);color:var(--accent3)">⚡ PLAY SOLO vs BOT</button>
       </div>
       <div class="how-to">
         <div class="how-step">
           <div class="step-num">01</div>
-          <div class="step-text">A target color fills the screen for 10 seconds. Memorize it — it will vanish!</div>
+          <div class="step-text">A target color fills the screen for 5 seconds. Memorize it — it will vanish!</div>
         </div>
         <div class="how-step">
           <div class="step-num">02</div>
@@ -695,6 +991,7 @@
       let memorizeInterval = null;
       let countdownInterval = null;
       let revealTimerInterval = null;
+      let isSoloMode = false;
 
       // HSB state for sat/bri sliders
       let currentH = 0, currentS = 0, currentBri = 50;
@@ -702,7 +999,32 @@
       // ============ HELPERS ============
       function showScreen(id) {
         document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-        document.getElementById(id).classList.add("active");
+        const screen = document.getElementById(id);
+        screen.classList.add("active");
+
+        // Trigger game screen element animations
+        if (id === "game-screen") {
+          // Small delay so the screen is visible first
+          setTimeout(() => {
+            document.querySelector(".game-topbar")?.classList.add("visible");
+            document.querySelector(".target-strip")?.classList.add("visible");
+            document.querySelector(".canvas-hex")?.classList.add("visible");
+            document.querySelector(".canvas-rgb")?.classList.add("visible");
+          }, 60);
+
+          const panel = document.querySelector(".picker-panel");
+          panel.classList.remove("visible");
+          setTimeout(() => {
+            panel.classList.add("visible");
+            // Stagger slider rows
+            document.querySelectorAll(".slider-row").forEach(row => {
+              row.classList.remove("anim-in");
+            });
+            setTimeout(() => {
+              document.querySelectorAll(".slider-row").forEach(row => row.classList.add("anim-in"));
+            }, 120);
+          }, 150);
+        }
       }
       function showToast(msg, duration = 3000) {
         const t = document.getElementById("toast");
@@ -871,6 +1193,11 @@
       }
 
       // ============ LOBBY ============
+      document.getElementById("solo-btn").addEventListener("click", () => {
+        const name = document.getElementById("player-name").value.trim() || "Player";
+        socket.emit("solo_start", { playerName: name });
+      });
+
       document.getElementById("create-btn").addEventListener("click", () => {
         const name = document.getElementById("player-name").value.trim() || "Player";
         const roomId = Math.random().toString(36).slice(2, 8).toUpperCase();
@@ -889,7 +1216,12 @@
 
       // ============ WAITING ============
       document.getElementById("display-room-code").addEventListener("click", () => {
-        navigator.clipboard.writeText(myRoomId).then(() => showToast("Room code copied!"));
+        navigator.clipboard.writeText(myRoomId).then(() => {
+          showToast("Room code copied!");
+          const el = document.getElementById("display-room-code");
+          el.classList.add("copied");
+          setTimeout(() => el.classList.remove("copied"), 600);
+        });
       });
       function updatePlayerSlots(players) {
         ["p1-slot", "p2-slot"].forEach((id, i) => {
@@ -945,14 +1277,30 @@
       });
       socket.on("error", ({ message }) => showToast("⚠ " + message));
 
-      socket.on("joined", ({ player, roomId }) => {
-        myPlayer = player; myRoomId = roomId;
-        document.getElementById("display-room-code").textContent = roomId;
+      socket.on("joined", ({ player, roomId, soloMode }) => {
+        myPlayer = player; myRoomId = roomId; isSoloMode = !!soloMode;
+        document.getElementById("display-room-code").textContent = soloMode ? "SOLO" : roomId;
         document.getElementById("my-score-name").textContent = player.name.toUpperCase();
-        showScreen("waiting-screen");
-        showToast(`Joined room ${roomId}`);
+        if (soloMode) {
+          document.getElementById("opp-score-name").textContent = "BOT";
+          showScreen("waiting-screen");
+          document.getElementById("waiting-msg").innerHTML = "SOLO MODE — STARTING<span class='blink'>_</span>";
+        } else {
+          showScreen("waiting-screen");
+          showToast(`Joined room ${roomId}`);
+        }
       });
-      socket.on("player_update", ({ players }) => {
+      socket.on("player_update", ({ players, soloMode }) => {
+        if (soloMode) {
+          // Show player slot + bot slot
+          const p1 = document.getElementById("p1-slot");
+          p1.classList.add("filled");
+          p1.innerHTML = `<div class="player-slot-label">Player 1</div><div class="pulse-dot"></div><div class="player-slot-name">${players[0]?.name || "You"}</div>`;
+          const p2 = document.getElementById("p2-slot");
+          p2.classList.add("filled");
+          p2.innerHTML = `<div class="player-slot-label">Bot</div><div class="pulse-dot" style="background:var(--accent3)"></div><div class="player-slot-name" style="color:var(--accent3)">BOT</div>`;
+          return;
+        }
         updatePlayerSlots(players);
         if (players.length === 2) {
           document.getElementById("waiting-msg").innerHTML = "BOTH PLAYERS READY — STARTING<span class='blink'>_</span>";
@@ -968,14 +1316,19 @@
         document.getElementById("my-dot").className = "status-dot pulsing";
         document.getElementById("opp-dot").className = "status-dot pulsing";
         document.getElementById("my-status-text").textContent = "YOU — MEMORIZING";
-        document.getElementById("opp-status-text").textContent = "OPP — MEMORIZING";
+        document.getElementById("opp-status-text").textContent = isSoloMode ? "BOT — MEMORIZING" : "OPP — MEMORIZING";
 
         updateScores(scores);
 
         document.getElementById("target-swatch").style.background = targetColor.hex;
         document.getElementById("target-swatch").style.opacity = "1";
         document.getElementById("target-hex").textContent = targetColor.hex;
-        document.getElementById("round-display").textContent = `${round} / ${maxRounds}`;
+
+        const roundEl = document.getElementById("round-display");
+        roundEl.classList.remove("flip");
+        void roundEl.offsetWidth; // reflow
+        roundEl.textContent = `${round} / ${maxRounds}`;
+        roundEl.classList.add("flip");
 
         const stateEl = document.getElementById("target-strip-state");
         stateEl.textContent = `MEMORIZE ${memorizeSeconds}s`;
@@ -1014,15 +1367,21 @@
 
         document.getElementById("submit-btn").disabled = false;
         document.getElementById("my-status-text").textContent = "YOU — PICKING";
-        document.getElementById("opp-status-text").textContent = "OPP — PICKING";
+        document.getElementById("opp-status-text").textContent = isSoloMode ? "BOT — PICKING" : "OPP — PICKING";
         showToast("🎨 Color hidden! Match from memory!");
+
+        // Re-animate sliders to draw attention
+        document.querySelectorAll(".slider-row").forEach(row => row.classList.remove("anim-in"));
+        setTimeout(() => {
+          document.querySelectorAll(".slider-row").forEach(row => row.classList.add("anim-in"));
+        }, 80);
       });
 
       socket.on("player_submitted", ({ playerId, submissionOrder, totalPlayers }) => {
         if (playerId !== socket.id) {
           document.getElementById("opp-dot").className = "status-dot submitted";
-          document.getElementById("opp-status-text").textContent = "OPP — LOCKED IN ✓";
-          showToast(`Opponent locked in! (${submissionOrder}/${totalPlayers})`);
+          document.getElementById("opp-status-text").textContent = isSoloMode ? "BOT — LOCKED IN ✓" : "OPP — LOCKED IN ✓";
+          showToast(isSoloMode ? `Bot locked in! (${submissionOrder}/${totalPlayers})` : `Opponent locked in! (${submissionOrder}/${totalPlayers})`);
         }
       });
       socket.on("round_result", ({ results, targetColor, round, maxRounds }) => {
@@ -1036,9 +1395,24 @@
       // ============ SCORE UPDATE ============
       function updateScores(scores) {
         if (!myPlayer) return;
-        document.getElementById("my-score").textContent = scores[socket.id] || 0;
+        const myScoreEl = document.getElementById("my-score");
+        const oppScoreEl = document.getElementById("opp-score");
+        const newMyScore = scores[socket.id] || 0;
         const oppId = Object.keys(scores).find(id => id !== socket.id);
-        if (oppId) document.getElementById("opp-score").textContent = scores[oppId] || 0;
+        const newOppScore = oppId ? (scores[oppId] || 0) : 0;
+
+        if (myScoreEl.textContent !== String(newMyScore)) {
+          myScoreEl.textContent = newMyScore;
+          myScoreEl.classList.remove("bump", "flash");
+          void myScoreEl.offsetWidth;
+          myScoreEl.classList.add("bump", "flash");
+        }
+        if (oppId && oppScoreEl.textContent !== String(newOppScore)) {
+          oppScoreEl.textContent = newOppScore;
+          oppScoreEl.classList.remove("bump", "flash");
+          void oppScoreEl.offsetWidth;
+          oppScoreEl.classList.add("bump", "flash");
+        }
       }
 
       // ============ ROUND RESULT ============
@@ -1047,7 +1421,7 @@
         const winner = results[0];
         const isWinner = winner.playerId === socket.id;
         const isTie = results.length > 1 && winner.accuracy === results[1]?.accuracy;
-        document.getElementById("result-title").textContent = isTie ? "IT'S A TIE!" : isWinner ? "YOU WIN! 🎯" : "OPPONENT WINS";
+        document.getElementById("result-title").textContent = isTie ? "IT'S A TIE!" : isWinner ? "YOU WIN! 🎯" : (isSoloMode ? "BOT WINS" : "OPPONENT WINS");
         document.getElementById("result-title").style.color = isWinner && !isTie ? "var(--accent)" : "var(--text)";
         document.getElementById("result-target-swatch").style.background = targetColor.hex;
         document.getElementById("result-target-hex").textContent = targetColor.hex;
@@ -1056,9 +1430,11 @@
         swatchCont.innerHTML = "";
         results.forEach(r => {
           const hex = rgbToHex(r.color.r, r.color.g, r.color.b);
+          const isMe = r.playerId === socket.id;
+          const displayName = r.playerName.toUpperCase();
           const div = document.createElement("div");
           div.className = "result-color-block";
-          div.innerHTML = `<div class="label">${r.playerName.toUpperCase()}</div><div class="result-swatch player" style="background:${hex}"></div><div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-dim)">${hex}</div>`;
+          div.innerHTML = `<div class="label">${displayName}</div><div class="result-swatch player" style="background:${hex}"></div><div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-dim)">${hex}</div>`;
           swatchCont.appendChild(div);
         });
 
@@ -1097,6 +1473,13 @@
         }, 1000);
 
         document.getElementById("result-overlay").classList.add("visible");
+        // Reset result cards opacity for animation re-trigger
+        document.querySelectorAll(".result-card").forEach(c => {
+          c.style.transition = "none";
+          c.style.opacity = "0";
+          void c.offsetWidth;
+          c.style.transition = "";
+        });
       }
 
       // ============ GAME OVER ============
@@ -1110,9 +1493,10 @@
         const podium = document.getElementById("final-podium");
         podium.innerHTML = "";
         finalResults.forEach((r, i) => {
+          const isMe = r.playerId === socket.id;
           const card = document.createElement("div");
           card.className = "podium-card" + (i === 0 ? " first" : "");
-          card.innerHTML = `<div class="podium-rank">#${i+1}</div><div class="podium-name">${r.playerName.toUpperCase()}</div><div class="podium-score"><span>${r.totalScore}</span> PTS</div>${r.playerId === socket.id ? `<div style="font-family:var(--mono);font-size:0.55rem;color:var(--text-muted);letter-spacing:0.12em">YOU</div>` : ""}`;
+          card.innerHTML = `<div class="podium-rank">#${i+1}</div><div class="podium-name">${r.playerName.toUpperCase()}</div><div class="podium-score"><span>${r.totalScore}</span> PTS</div>${isMe ? `<div style="font-family:var(--mono);font-size:0.55rem;color:var(--text-muted);letter-spacing:0.12em">YOU</div>` : ""}`;
           podium.appendChild(card);
         });
         showScreen("gameover-screen");

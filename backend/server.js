@@ -45,6 +45,37 @@ function colorDistance(c1, c2) {
   return { distance: Math.round(dist), accuracy: Math.round(accuracy * 10) / 10 };
 }
 
+function generateBotColor(targetColor) {
+  const errorRange = Math.floor(Math.random() * 80) + 20;
+  const clamp = (v) => Math.max(0, Math.min(255, Math.round(v)));
+  return {
+    r: clamp(targetColor.r + (Math.random() * errorRange * 2 - errorRange)),
+    g: clamp(targetColor.g + (Math.random() * errorRange * 2 - errorRange)),
+    b: clamp(targetColor.b + (Math.random() * errorRange * 2 - errorRange)),
+  };
+}
+
+function scheduleBotSubmit(room) {
+  if (!room.soloMode) return;
+  const botDelay = Math.floor(Math.random() * 9000) + 3000;
+  room.botSubmitTimeout = setTimeout(() => {
+    if (!room || room.status !== "playing") return;
+    if (room.submissions["bot"]) return;
+    const botColor = generateBotColor(room.targetColor);
+    const timeTaken = Date.now() - room.roundStartTime;
+    room.submissions["bot"] = { color: botColor, timeTaken };
+    room.submitOrder.push("bot");
+    io.to(room.id).emit("player_submitted", {
+      playerId: "bot",
+      submissionOrder: room.submitOrder.length,
+      totalPlayers: 2,
+    });
+    if (room.submitOrder.length === 2) {
+      setTimeout(() => resolveRound(room), 800);
+    }
+  }, botDelay);
+}
+
 function createRoom(roomId) {
   return {
     id: roomId,
@@ -57,10 +88,12 @@ function createRoom(roomId) {
     scores: {},
     status: "waiting", // waiting, playing, reviewing, finished
     roundStartTime: null,
+    soloMode: false,
+    botSubmitTimeout: null,
   };
 }
 
-const MEMORIZE_SECONDS = 10;
+const MEMORIZE_SECONDS = 5;
 
 function startRound(room) {
   room.targetColor = generateColor();
@@ -84,6 +117,7 @@ function startRound(room) {
     room.status = "playing";
     room.roundStartTime = Date.now();
     io.to(room.id).emit("memorize_end", {});
+    scheduleBotSubmit(room);
   }, MEMORIZE_SECONDS * 1000);
 }
 
@@ -94,7 +128,10 @@ function resolveRound(room) {
   // Process in submission order
   room.submitOrder.forEach((playerId, index) => {
     const sub = room.submissions[playerId];
-    const player = room.players.find((p) => p.id === playerId);
+    const isBot = playerId === "bot";
+    const player = isBot
+      ? { id: "bot", name: "BOT" }
+      : room.players.find((p) => p.id === playerId);
     const { distance, accuracy } = colorDistance(room.targetColor, sub.color);
 
     // Bonus points for submitting first (only if accuracy > 50%)
@@ -142,18 +179,45 @@ function resolveRound(room) {
 
 function endGame(room) {
   room.status = "finished";
-  const finalResults = room.players.map((p) => ({
+  const allPlayers = room.soloMode
+    ? [...room.players, { id: "bot", name: "BOT" }]
+    : room.players;
+  const finalResults = allPlayers.map((p) => ({
     playerId: p.id,
     playerName: p.name,
     totalScore: room.scores[p.id] || 0,
   }));
   finalResults.sort((a, b) => b.totalScore - a.totalScore);
-
   io.to(room.id).emit("game_over", { finalResults });
 }
 
 io.on("connection", (socket) => {
   console.log("Connected:", socket.id);
+
+  socket.on("solo_start", ({ playerName }) => {
+    const roomId = "SOLO_" + socket.id.slice(0, 6).toUpperCase();
+    if (!rooms[roomId]) {
+      rooms[roomId] = createRoom(roomId);
+    }
+    const room = rooms[roomId];
+    room.soloMode = true;
+    room.scores["bot"] = 0;
+
+    const player = {
+      id: socket.id,
+      name: playerName || "Player",
+      playerNumber: 1,
+    };
+    room.players.push(player);
+    room.scores[socket.id] = 0;
+    socket.join(roomId);
+    socket.roomId = roomId;
+
+    socket.emit("joined", { player, roomId, playerCount: 1, soloMode: true });
+    socket.emit("player_update", { players: room.players, playerCount: 1, soloMode: true });
+
+    setTimeout(() => startRound(room), 1000);
+  });
 
   socket.on("join_room", ({ roomId, playerName }) => {
     // Find or create room
@@ -217,7 +281,8 @@ io.on("connection", (socket) => {
     });
 
     // If all players submitted, resolve round
-    if (room.submitOrder.length === room.players.length) {
+    const expectedSubmitters = room.soloMode ? 2 : room.players.length;
+    if (room.submitOrder.length === expectedSubmitters) {
       setTimeout(() => resolveRound(room), 800);
     }
   });
@@ -228,10 +293,10 @@ io.on("connection", (socket) => {
     const room = rooms[roomId];
 
     if (room.status === "finished") {
-      // Reset room
       room.round = 0;
       room.scores = {};
       room.players.forEach((p) => (room.scores[p.id] = 0));
+      if (room.soloMode) room.scores["bot"] = 0;
       setTimeout(() => startRound(room), 1000);
     }
   });
