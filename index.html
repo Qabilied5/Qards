@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CHROMATCH — Color Accuracy Battle</title>
+    <title>QARDS — Color Accuracy Battle</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -605,6 +605,10 @@
         background: var(--border-bright);
       }
 
+      .color-slider {
+        touch-action: pan-x;
+      }
+
       .color-slider::-webkit-slider-thumb {
         -webkit-appearance: none;
         width: 14px;
@@ -612,6 +616,15 @@
         background: var(--text);
         cursor: pointer;
         border: 2px solid var(--bg);
+      }
+
+      .color-slider::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+        background: var(--text);
+        cursor: pointer;
+        border: 2px solid var(--bg);
+        border-radius: 0;
       }
 
       .slider-val {
@@ -1035,51 +1048,357 @@
         z-index: 1;
       }
 
-      /* Responsive */
+      /* ---- MOBILE OPTIMIZATIONS ---- */
       @media (max-width: 768px) {
+        /* Header */
         header {
-          padding: 16px 20px;
+          padding: 12px 16px;
+        }
+
+        .logo {
+          font-size: 1.5rem;
+        }
+
+        .header-badge {
+          font-size: 0.55rem;
+          padding: 3px 7px;
+          letter-spacing: 0.08em;
+        }
+
+        /* Screens */
+        .screen.active {
+          padding: 24px 16px;
+        }
+
+        .screen {
+          min-height: calc(100vh - 57px);
+        }
+
+        /* Lobby */
+        #lobby-screen {
+          gap: 28px;
+        }
+
+        .hero-title {
+          font-size: clamp(2.5rem, 14vw, 4rem);
+          line-height: 0.88;
+        }
+
+        .hero-sub {
+          font-size: 0.65rem;
+          letter-spacing: 0.15em;
+        }
+
+        .lobby-card {
+          padding: 20px 16px;
+          max-width: 100%;
+        }
+
+        .form-input {
+          font-size: 1rem;
+          padding: 14px 14px;
+          margin-bottom: 16px;
+        }
+
+        .btn-primary {
+          font-size: 1.1rem;
+          padding: 16px 24px;
+          min-height: 52px;
+        }
+
+        .btn-secondary {
+          font-size: 1rem;
+          padding: 15px 24px;
+          min-height: 52px;
+        }
+
+        .how-to {
+          flex-direction: column;
+          gap: 10px;
+          max-width: 100%;
+        }
+
+        .how-step {
+          padding: 14px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .step-num {
+          font-size: 2rem;
+          margin-bottom: 0;
+          min-width: 48px;
+          color: var(--accent);
+          opacity: 0.5;
+        }
+
+        .step-text {
+          font-size: 0.72rem;
+        }
+
+        /* Waiting screen */
+        #waiting-screen {
+          gap: 20px;
+        }
+
+        .room-code {
+          font-size: 2.2rem;
+          padding: 14px 28px;
+          letter-spacing: 0.15em;
+        }
+
+        .players-grid {
+          max-width: 100%;
+        }
+
+        .player-slot {
+          min-height: 80px;
+          padding: 16px 12px;
+        }
+
+        .player-slot-name {
+          font-size: 1.2rem;
+        }
+
+        /* Game screen */
+        .game-layout {
+          min-height: calc(100vh - 57px);
+          grid-template-rows: auto 1fr auto;
         }
 
         .game-topbar {
-          padding: 12px 20px;
+          padding: 10px 14px;
+          gap: 8px;
+        }
+
+        .score-pts {
+          font-size: 1.6rem;
+        }
+
+        .score-name {
+          font-size: 0.55rem;
+        }
+
+        .round-num {
+          font-size: 1.2rem;
         }
 
         .game-main {
           grid-template-columns: 1fr;
+          overflow-y: auto;
         }
 
         .target-panel {
           border-right: none;
           border-bottom: 1px solid var(--border);
-          padding: 24px 20px;
+          padding: 18px 16px;
+          gap: 14px;
+          min-height: unset;
         }
 
-        .picker-panel {
-          padding: 24px 20px;
+        .target-label {
+          position: static;
+          margin-bottom: 0;
+          align-self: flex-start;
+        }
+
+        .picker-label {
+          position: static;
+          align-self: flex-start;
         }
 
         .target-swatch,
         .your-swatch {
-          width: 140px;
-          height: 140px;
+          width: 100px;
+          height: 100px;
         }
 
+        .target-hex {
+          font-size: 1rem;
+        }
+
+        .target-rgb {
+          font-size: 0.65rem;
+        }
+
+        .picker-panel {
+          padding: 18px 16px;
+          gap: 14px;
+        }
+
+        .picker-controls {
+          max-width: 100%;
+          width: 100%;
+          gap: 14px;
+        }
+
+        .color-slider {
+          height: 6px;
+        }
+
+        .color-slider::-webkit-slider-thumb {
+          width: 22px;
+          height: 22px;
+        }
+
+        .color-slider::-moz-range-thumb {
+          width: 22px;
+          height: 22px;
+        }
+
+        .slider-label {
+          font-size: 0.8rem;
+          width: 18px;
+        }
+
+        .slider-val {
+          font-size: 0.75rem;
+          width: 36px;
+        }
+
+        .hex-input {
+          font-size: 1rem;
+          padding: 10px 10px;
+          max-width: none;
+          flex: 1;
+        }
+
+        /* Bottom bar */
         .game-bottombar {
-          padding: 16px 20px;
-          flex-wrap: wrap;
+          padding: 12px 14px;
+          flex-wrap: nowrap;
+          gap: 12px;
+        }
+
+        .submit-status {
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .status-pill {
+          font-size: 0.58rem;
+        }
+
+        .btn-submit {
+          font-size: 1rem;
+          padding: 14px 20px;
+          min-height: 52px;
+          white-space: nowrap;
+          flex-shrink: 0;
         }
 
         .vs-divider {
           display: none;
         }
 
-        .lobby-card {
-          padding: 24px;
+        /* Result overlay */
+        #result-overlay {
+          gap: 20px;
+          padding: 24px 16px;
+          overflow-y: auto;
+          align-items: flex-start;
+          justify-content: flex-start;
+          padding-top: 40px;
         }
 
-        .how-to {
-          flex-direction: column;
+        .result-title {
+          font-size: clamp(1.8rem, 10vw, 3rem);
+        }
+
+        .result-colors {
+          gap: 16px;
+          flex-wrap: nowrap;
+        }
+
+        .result-color-block {
+          min-width: 100px;
+        }
+
+        .result-swatch {
+          width: 64px;
+          height: 64px;
+        }
+
+        .result-cards {
+          grid-template-columns: 1fr;
+          max-width: 100%;
+          width: 100%;
+        }
+
+        .result-card {
+          padding: 16px;
+        }
+
+        /* Game over screen */
+        #gameover-screen {
+          gap: 28px;
+        }
+
+        .final-podium {
+          max-width: 100%;
+        }
+
+        .podium-card {
+          padding: 20px 14px;
+        }
+
+        .podium-name {
+          font-size: 1.2rem;
+        }
+
+        .gameover-btns {
+          max-width: 100%;
+          width: 100%;
+        }
+
+        /* Toast */
+        .toast {
+          bottom: 16px;
+          left: 16px;
+          right: 16px;
+          transform: translateX(0) translateY(20px);
+          white-space: normal;
+          text-align: center;
+          font-size: 0.7rem;
+        }
+
+        .toast.show {
+          transform: translateX(0) translateY(0);
+        }
+      }
+
+      /* Extra small screens */
+      @media (max-width: 380px) {
+        .hero-title {
+          font-size: 2.2rem;
+        }
+
+        .logo {
+          font-size: 1.3rem;
+        }
+
+        .header-badge:not(#conn-status) {
+          display: none;
+        }
+
+        .target-swatch,
+        .your-swatch {
+          width: 80px;
+          height: 80px;
+        }
+
+        .game-topbar {
+          padding: 8px 10px;
+        }
+
+        .score-pts {
+          font-size: 1.4rem;
+        }
+
+        .btn-submit {
+          padding: 12px 14px;
+          font-size: 0.9rem;
         }
       }
 
@@ -1133,7 +1452,7 @@
   <body>
     <!-- HEADER -->
     <header>
-      <div class="logo">CHRO<span>MATCH</span></div>
+      <div class="logo">QAR<span>DS</span></div>
       <div class="header-badge">COLOR ACCURACY BATTLE</div>
       <div class="header-badge" id="conn-status">● CONNECTING</div>
     </header>
