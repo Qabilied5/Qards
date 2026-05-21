@@ -2,423 +2,529 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>QARDS — Color Accuracy Battle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>CHROMATCH — Color Accuracy Battle</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <script src="/socket.io/socket.io.js"></script>
     <style>
       :root {
-        --bg: #080808;
-        --surface: #111111;
-        --surface2: #181818;
-        --border: #222222;
-        --border-bright: #333333;
-        --text: #f0f0f0;
-        --text-dim: #666666;
-        --text-muted: #444444;
-        --accent: #e8ff3a;
+        --bg: #0a0a0f;
+        --surface: #13131a;
+        --surface2: #1a1a24;
+        --surface3: #22222f;
+        --border: #1e1e2e;
+        --border-bright: #2e2e42;
+        --text: #f0f0f5;
+        --text-dim: #7070a0;
+        --text-muted: #3a3a55;
+        --accent: #c8ff00;
+        --accent-dim: rgba(200,255,0,0.12);
         --accent2: #ff3a6e;
-        --accent3: #3affcb;
+        --accent3: #00e5a0;
+        --accent3-dim: rgba(0,229,160,0.12);
         --mono: "Space Mono", monospace;
         --display: "Bebas Neue", sans-serif;
-        --body: "DM Sans", sans-serif;
+        --body: "Inter", sans-serif;
+        --radius: 12px;
+        --radius-sm: 8px;
+        --shadow: 0 8px 32px rgba(0,0,0,0.5);
+        --shadow-glow: 0 0 40px rgba(200,255,0,0.08);
       }
 
-      * {
-        margin: 0;
-        padding: 0;
+      *, *::before, *::after {
+        margin: 0; padding: 0;
         box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
       }
 
-      html,
+      html {
+        height: 100%;
+        touch-action: manipulation;
+        -webkit-text-size-adjust: 100%;
+      }
+
       body {
         height: 100%;
+        min-height: 100dvh;
         background: var(--bg);
         color: var(--text);
         font-family: var(--body);
         overflow-x: hidden;
+        user-select: none;
+        -webkit-user-select: none;
       }
 
-      /* Grain overlay */
+      /* Subtle grain */
       body::before {
         content: "";
-        position: fixed;
-        inset: 0;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-        pointer-events: none;
-        z-index: 9999;
-        opacity: 0.4;
+        position: fixed; inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+        pointer-events: none; z-index: 9999; opacity: 0.5;
       }
 
-      /* Scanline effect */
-      body::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        background: repeating-linear-gradient(
-          0deg,
-          transparent,
-          transparent 2px,
-          rgba(0, 0, 0, 0.03) 2px,
-          rgba(0, 0, 0, 0.03) 4px
-        );
-        pointer-events: none;
-        z-index: 9998;
-      }
-
-      /* ---- HEADER ---- */
+      /* ===== HEADER ===== */
       header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 20px 40px;
+        padding: 14px 20px;
         border-bottom: 1px solid var(--border);
-        position: relative;
+        background: var(--surface);
+        position: sticky; top: 0; z-index: 50;
       }
 
       .logo {
         font-family: var(--display);
-        font-size: 2rem;
-        letter-spacing: 0.05em;
-        color: var(--text);
+        font-size: 1.7rem;
+        letter-spacing: 0.06em;
+        line-height: 1;
+      }
+      .logo span { color: var(--accent); }
+
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
 
-      .logo span {
-        color: var(--accent);
-      }
-
-      .header-badge {
+      .conn-badge {
         font-family: var(--mono);
-        font-size: 0.65rem;
+        font-size: 0.58rem;
         color: var(--text-dim);
         border: 1px solid var(--border-bright);
         padding: 4px 10px;
-        letter-spacing: 0.12em;
+        border-radius: 20px;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
+        transition: all 0.3s;
+      }
+      .conn-badge.connected {
+        color: var(--accent3);
+        border-color: var(--accent3);
+        background: var(--accent3-dim);
       }
 
-      /* ---- SCREENS ---- */
-      .screen {
-        display: none;
-        min-height: calc(100vh - 73px);
-      }
-
+      /* ===== SCREENS ===== */
+      .screen { display: none; }
       .screen.active {
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        padding: 40px 20px;
+        min-height: calc(100dvh - 57px);
+        padding: 28px 20px 40px;
       }
 
-      /* ---- LOBBY SCREEN ---- */
-      #lobby-screen {
-        gap: 48px;
-      }
+      /* ===== LOBBY ===== */
+      #lobby-screen { gap: 32px; justify-content: center; }
+
+      .hero-block { text-align: center; }
 
       .hero-title {
         font-family: var(--display);
-        font-size: clamp(3rem, 10vw, 7rem);
-        line-height: 0.9;
-        text-align: center;
+        font-size: clamp(3.2rem, 16vw, 6rem);
+        line-height: 0.88;
         letter-spacing: 0.02em;
       }
-
       .hero-title em {
-        color: var(--accent);
         font-style: normal;
+        color: var(--accent);
         position: relative;
         display: inline-block;
       }
-
       .hero-title em::after {
         content: "";
         position: absolute;
-        bottom: 4px;
-        left: 0;
-        right: 0;
+        bottom: 2px; left: 0; right: 0;
         height: 3px;
         background: var(--accent);
-        opacity: 0.4;
+        opacity: 0.35;
+        border-radius: 2px;
       }
 
       .hero-sub {
-        font-family: var(--mono);
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         color: var(--text-dim);
-        letter-spacing: 0.2em;
+        letter-spacing: 0.22em;
         text-transform: uppercase;
-        text-align: center;
+        margin-top: 12px;
+        font-family: var(--mono);
       }
 
       .lobby-card {
         background: var(--surface);
         border: 1px solid var(--border);
-        padding: 40px;
+        border-radius: var(--radius);
+        padding: 24px 20px;
         width: 100%;
-        max-width: 480px;
+        max-width: 420px;
         position: relative;
+        box-shadow: var(--shadow);
       }
-
       .lobby-card::before {
         content: "";
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, var(--accent), transparent);
+        top: 0; left: 20px; right: 20px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--accent), transparent);
       }
+
+      .form-group { margin-bottom: 16px; }
 
       .form-label {
         font-family: var(--mono);
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         color: var(--text-dim);
-        letter-spacing: 0.15em;
+        letter-spacing: 0.18em;
         text-transform: uppercase;
-        margin-bottom: 8px;
         display: block;
+        margin-bottom: 7px;
       }
 
       .form-input {
         width: 100%;
         background: var(--surface2);
         border: 1px solid var(--border-bright);
+        border-radius: var(--radius-sm);
         color: var(--text);
         font-family: var(--mono);
-        font-size: 0.9rem;
-        padding: 12px 16px;
+        font-size: 1rem; /* no iOS zoom */
+        padding: 13px 14px;
         outline: none;
-        transition: border-color 0.2s;
-        margin-bottom: 20px;
+        transition: border-color 0.2s, box-shadow 0.2s;
         letter-spacing: 0.05em;
       }
-
       .form-input:focus {
         border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-dim);
       }
-
-      .form-input::placeholder {
-        color: var(--text-muted);
-      }
+      .form-input::placeholder { color: var(--text-muted); }
 
       .btn-primary {
         width: 100%;
         background: var(--accent);
-        color: #000;
+        color: #0a0a0f;
         border: none;
+        border-radius: var(--radius-sm);
         font-family: var(--display);
-        font-size: 1.3rem;
+        font-size: 1.25rem;
         letter-spacing: 0.1em;
-        padding: 14px 32px;
+        padding: 15px 24px;
+        min-height: 54px;
         cursor: pointer;
-        transition: all 0.15s;
+        transition: all 0.18s;
+        font-weight: 400;
         position: relative;
         overflow: hidden;
       }
-
-      .btn-primary::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: rgba(255, 255, 255, 0.1);
-        opacity: 0;
-        transition: opacity 0.15s;
-      }
-
-      .btn-primary:hover::after {
-        opacity: 1;
-      }
-
-      .btn-primary:active {
-        transform: scale(0.98);
-      }
+      .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+      .btn-primary:hover { box-shadow: 0 4px 20px rgba(200,255,0,0.25); }
 
       .btn-secondary {
         width: 100%;
-        background: transparent;
+        background: var(--surface2);
         color: var(--text);
         border: 1px solid var(--border-bright);
+        border-radius: var(--radius-sm);
         font-family: var(--display);
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         letter-spacing: 0.1em;
-        padding: 13px 32px;
+        padding: 14px 24px;
+        min-height: 54px;
         cursor: pointer;
-        transition: all 0.15s;
+        transition: all 0.18s;
         margin-top: 10px;
       }
-
-      .btn-secondary:hover {
-        border-color: var(--accent);
-        color: var(--accent);
-      }
+      .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+      .btn-secondary:active { transform: scale(0.97); }
 
       .how-to {
         display: flex;
-        gap: 20px;
+        flex-direction: column;
+        gap: 10px;
         width: 100%;
-        max-width: 480px;
+        max-width: 420px;
       }
 
       .how-step {
-        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 16px;
         border: 1px solid var(--border);
-        padding: 16px;
-        position: relative;
+        border-radius: var(--radius-sm);
+        padding: 14px 16px;
+        background: var(--surface);
       }
-
       .step-num {
         font-family: var(--display);
-        font-size: 2.5rem;
-        color: var(--border-bright);
+        font-size: 2.2rem;
+        color: var(--accent);
+        opacity: 0.4;
         line-height: 1;
-        margin-bottom: 6px;
+        min-width: 44px;
       }
-
       .step-text {
         font-size: 0.75rem;
         color: var(--text-dim);
-        line-height: 1.5;
+        line-height: 1.55;
+        font-weight: 400;
       }
 
-      /* ---- WAITING SCREEN ---- */
-      #waiting-screen {
-        gap: 32px;
-      }
+      /* ===== WAITING SCREEN ===== */
+      #waiting-screen { gap: 24px; justify-content: center; }
 
-      .waiting-room-id {
+      .room-code-label {
         font-family: var(--mono);
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         color: var(--text-dim);
-        letter-spacing: 0.2em;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
         text-align: center;
-        margin-bottom: -16px;
       }
 
       .room-code {
         font-family: var(--display);
         font-size: 3rem;
-        letter-spacing: 0.2em;
+        letter-spacing: 0.22em;
         color: var(--accent);
         text-align: center;
-        border: 1px solid var(--border);
-        padding: 16px 40px;
+        border: 1px solid var(--border-bright);
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 18px 40px;
         cursor: pointer;
-        transition: border-color 0.2s;
+        transition: all 0.2s;
+        box-shadow: 0 0 24px rgba(200,255,0,0.06);
       }
-
-      .room-code:hover {
-        border-color: var(--accent);
-      }
+      .room-code:active { transform: scale(0.97); }
 
       .copy-hint {
         font-family: var(--mono);
-        font-size: 0.6rem;
+        font-size: 0.58rem;
         color: var(--text-muted);
         text-align: center;
-        letter-spacing: 0.1em;
-        margin-top: -24px;
+        letter-spacing: 0.12em;
       }
 
       .players-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 16px;
+        gap: 12px;
         width: 100%;
-        max-width: 480px;
+        max-width: 420px;
       }
 
       .player-slot {
         border: 1px solid var(--border);
-        padding: 20px;
+        border-radius: var(--radius);
+        padding: 20px 14px;
         text-align: center;
-        position: relative;
-        min-height: 100px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         gap: 8px;
+        min-height: 90px;
+        background: var(--surface);
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
       }
-
-      .player-slot.filled {
-        border-color: var(--accent);
-      }
-
+      .player-slot.filled { border-color: var(--accent); background: var(--surface2); }
       .player-slot.filled::before {
         content: "";
         position: absolute;
         inset: 0;
-        background: var(--accent);
-        opacity: 0.03;
+        background: radial-gradient(circle at 50% 0%, rgba(200,255,0,0.06), transparent 70%);
       }
 
       .player-slot-label {
         font-family: var(--mono);
-        font-size: 0.6rem;
+        font-size: 0.58rem;
         color: var(--text-muted);
         letter-spacing: 0.15em;
         text-transform: uppercase;
       }
-
       .player-slot-name {
         font-family: var(--display);
-        font-size: 1.4rem;
+        font-size: 1.3rem;
         letter-spacing: 0.05em;
       }
-
       .player-slot-empty {
-        font-family: var(--mono);
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         color: var(--text-muted);
-        letter-spacing: 0.05em;
+        font-family: var(--mono);
       }
 
       .pulse-dot {
-        width: 8px;
-        height: 8px;
+        width: 7px; height: 7px;
         background: var(--text-muted);
         border-radius: 50%;
         animation: pulse 1.5s ease-in-out infinite;
       }
-
-      .player-slot.filled .pulse-dot {
-        background: var(--accent3);
-        animation: none;
-      }
+      .player-slot.filled .pulse-dot { background: var(--accent3); animation: none; }
 
       @keyframes pulse {
-        0%,
-        100% {
-          opacity: 0.3;
-          transform: scale(0.8);
-        }
-        50% {
-          opacity: 1;
-          transform: scale(1);
-        }
+        0%, 100% { opacity: 0.3; transform: scale(0.8); }
+        50% { opacity: 1; transform: scale(1.1); }
       }
 
-      /* ---- GAME SCREEN ---- */
-      #game-screen {
-        padding: 0;
+      .waiting-msg {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--text-dim);
+        letter-spacing: 0.1em;
+        text-align: center;
+      }
+
+      .blink { animation: blink 1s step-end infinite; }
+      @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+      /* ===== FULLSCREEN COLOR REVEAL ===== */
+      #color-reveal {
         display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        animation: revealIn 0.4s cubic-bezier(0.16,1,0.3,1);
+      }
+      #color-reveal.active { display: flex; }
+
+      @keyframes revealIn {
+        from { opacity: 0; transform: scale(1.06); }
+        to { opacity: 1; transform: scale(1); }
       }
 
-      #game-screen.active {
-        display: block;
-        padding: 0;
+      .reveal-top-bar {
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        padding: 20px 24px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
       }
+
+      .reveal-label {
+        font-family: var(--mono);
+        font-size: 0.65rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.6);
+        font-weight: 700;
+      }
+
+      .reveal-timer-ring {
+        position: relative;
+        width: 52px; height: 52px;
+      }
+      .reveal-timer-ring svg {
+        position: absolute;
+        inset: 0;
+        transform: rotate(-90deg);
+      }
+      .reveal-timer-ring .ring-bg {
+        fill: none;
+        stroke: rgba(255,255,255,0.15);
+        stroke-width: 3;
+      }
+      .reveal-timer-ring .ring-fill {
+        fill: none;
+        stroke: rgba(255,255,255,0.9);
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-dasharray: 138;
+        stroke-dashoffset: 0;
+        transition: stroke-dashoffset 1s linear;
+      }
+      .reveal-timer-num {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--display);
+        font-size: 1.2rem;
+        color: rgba(255,255,255,0.9);
+        line-height: 1;
+      }
+
+      .reveal-center {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+        text-align: center;
+        padding: 20px;
+      }
+
+      .reveal-memorize-text {
+        font-family: var(--display);
+        font-size: clamp(2rem, 9vw, 3.5rem);
+        letter-spacing: 0.08em;
+        color: rgba(255,255,255,0.9);
+        text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+      }
+
+      .reveal-hex {
+        font-family: var(--mono);
+        font-size: clamp(1.6rem, 7vw, 2.5rem);
+        letter-spacing: 0.2em;
+        color: rgba(255,255,255,0.85);
+        background: rgba(0,0,0,0.2);
+        padding: 10px 24px;
+        border-radius: 8px;
+        backdrop-filter: blur(4px);
+      }
+
+      .reveal-rgb {
+        font-family: var(--mono);
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.55);
+        letter-spacing: 0.12em;
+        display: flex;
+        gap: 16px;
+      }
+
+      .reveal-hint {
+        font-family: var(--mono);
+        font-size: 0.65rem;
+        color: rgba(255,255,255,0.4);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        margin-top: 8px;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .reveal-bottom-bar {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 4px;
+        background: rgba(255,255,255,0.15);
+        overflow: hidden;
+      }
+      .reveal-progress-bar {
+        height: 100%;
+        background: rgba(255,255,255,0.85);
+        width: 100%;
+        transform-origin: left;
+        transition: transform 1s linear;
+      }
+
+      /* ===== GAME SCREEN ===== */
+      #game-screen { padding: 0; display: none; }
+      #game-screen.active { display: block; padding: 0; min-height: unset; }
 
       .game-layout {
-        display: grid;
-        grid-template-rows: auto 1fr auto;
-        min-height: calc(100vh - 73px);
+        display: flex;
+        flex-direction: column;
+        height: calc(100dvh - 57px);
       }
 
       /* Top bar */
@@ -426,158 +532,194 @@
         display: grid;
         grid-template-columns: 1fr auto 1fr;
         align-items: center;
-        padding: 16px 40px;
+        padding: 12px 16px;
         border-bottom: 1px solid var(--border);
-        gap: 20px;
+        background: var(--surface);
+        gap: 12px;
+        flex-shrink: 0;
       }
 
-      .score-block {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-
-      .score-block.right {
-        text-align: right;
-        align-items: flex-end;
-      }
+      .score-block { display: flex; flex-direction: column; gap: 2px; }
+      .score-block.right { text-align: right; align-items: flex-end; }
 
       .score-name {
         font-family: var(--mono);
-        font-size: 0.65rem;
+        font-size: 0.55rem;
         color: var(--text-dim);
-        letter-spacing: 0.12em;
+        letter-spacing: 0.14em;
         text-transform: uppercase;
       }
-
       .score-pts {
         font-family: var(--display);
-        font-size: 2rem;
+        font-size: 1.8rem;
         line-height: 1;
         letter-spacing: 0.05em;
         transition: color 0.3s;
       }
+      .score-pts.you { color: var(--accent); }
 
-      .score-pts.you {
-        color: var(--accent);
-      }
-
-      .round-info {
-        text-align: center;
-      }
-
+      .round-info { text-align: center; }
       .round-label {
         font-family: var(--mono);
-        font-size: 0.6rem;
+        font-size: 0.52rem;
         color: var(--text-muted);
-        letter-spacing: 0.15em;
+        letter-spacing: 0.18em;
         text-transform: uppercase;
-        margin-bottom: 4px;
+        margin-bottom: 2px;
       }
-
       .round-num {
         font-family: var(--display);
-        font-size: 1.5rem;
-        letter-spacing: 0.1em;
+        font-size: 1.25rem;
+        letter-spacing: 0.08em;
       }
 
-      /* Main game area */
-      .game-main {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0;
-      }
-
-      /* Target color panel */
-      .target-panel {
+      /* Game main content - flex column, fills remaining space */
+      .game-content {
+        flex: 1;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 40px;
-        border-right: 1px solid var(--border);
-        gap: 24px;
-        position: relative;
-      }
-
-      .target-label {
-        font-family: var(--mono);
-        font-size: 0.65rem;
-        color: var(--text-dim);
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        position: absolute;
-        top: 24px;
-        left: 40px;
-      }
-
-      .target-swatch {
-        width: 200px;
-        height: 200px;
-        border: 2px solid rgba(255, 255, 255, 0.1);
-        position: relative;
-        transition: background 0.3s;
-      }
-
-      .target-swatch::after {
-        content: "";
-        position: absolute;
-        inset: -8px;
-        border: 1px solid rgba(255, 255, 255, 0.05);
-      }
-
-      .target-hex {
-        font-family: var(--mono);
-        font-size: 1.2rem;
-        letter-spacing: 0.15em;
-        color: var(--text-dim);
-      }
-
-      .target-rgb {
-        font-family: var(--mono);
-        font-size: 0.7rem;
-        color: var(--text-muted);
-        letter-spacing: 0.1em;
-      }
-
-      /* Picker panel */
-      .picker-panel {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 40px;
-        gap: 24px;
-        position: relative;
-      }
-
-      .picker-label {
-        font-family: var(--mono);
-        font-size: 0.65rem;
-        color: var(--text-dim);
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        position: absolute;
-        top: 24px;
-        left: 40px;
-      }
-
-      .your-swatch {
-        width: 200px;
-        height: 200px;
-        border: 2px solid rgba(255, 255, 255, 0.1);
-        position: relative;
-        transition: background 0.1s;
-        cursor: pointer;
         overflow: hidden;
       }
 
-      .picker-controls {
+      /* Target panel - compact info strip after reveal */
+      .target-strip {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface2);
+        flex-shrink: 0;
+      }
+
+      .target-strip-swatch {
+        width: 38px;
+        height: 38px;
+        border-radius: var(--radius-sm);
+        border: 1px solid rgba(255,255,255,0.1);
+        flex-shrink: 0;
+        transition: background 0.3s, opacity 0.5s;
+      }
+
+      .target-strip-info { flex: 1; min-width: 0; }
+
+      .target-strip-label {
+        font-family: var(--mono);
+        font-size: 0.55rem;
+        color: var(--text-dim);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 2px;
+      }
+
+      .target-strip-hex {
+        font-family: var(--mono);
+        font-size: 0.95rem;
+        letter-spacing: 0.1em;
+        transition: opacity 0.5s;
+      }
+
+      .target-strip-state {
+        font-family: var(--mono);
+        font-size: 0.58rem;
+        letter-spacing: 0.1em;
+        padding: 5px 10px;
+        border-radius: 20px;
+        flex-shrink: 0;
+      }
+      .target-strip-state.memorizing {
+        color: var(--accent);
+        background: var(--accent-dim);
+        border: 1px solid rgba(200,255,0,0.2);
+      }
+      .target-strip-state.hidden {
+        color: var(--text-dim);
+        background: var(--surface3);
+        border: 1px solid var(--border-bright);
+      }
+
+      /* Picker area — fills remaining space */
+      .picker-area {
+        flex: 1;
         display: flex;
         flex-direction: column;
+        padding: 16px;
+        gap: 14px;
+        overflow-y: auto;
+      }
+
+      /* Color preview row */
+      .color-preview-row {
+        display: flex;
         gap: 12px;
+        align-items: stretch;
+      }
+
+      .your-swatch-wrap {
+        position: relative;
+        flex: 1;
+        border-radius: var(--radius);
+        overflow: hidden;
+        border: 2px solid rgba(255,255,255,0.08);
+        min-height: 100px;
+      }
+
+      .your-swatch {
         width: 100%;
-        max-width: 300px;
+        height: 100%;
+        min-height: 100px;
+        transition: background 0.1s;
+      }
+
+      .submitted-overlay {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 6px;
+        font-family: var(--display);
+        font-size: 1.4rem;
+        letter-spacing: 0.08em;
+        color: var(--accent3);
+        opacity: 0;
+        transition: opacity 0.3s;
+        backdrop-filter: blur(2px);
+      }
+      .submitted-overlay.visible { opacity: 1; }
+
+      .your-hex-label {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        min-width: 0;
+      }
+      .your-label-text {
+        font-family: var(--mono);
+        font-size: 0.55rem;
+        color: var(--text-dim);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      .your-hex-val {
+        font-family: var(--mono);
+        font-size: 0.88rem;
+        letter-spacing: 0.06em;
+        color: var(--text);
+      }
+
+      /* Sliders */
+      .sliders-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 16px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
       }
 
       .slider-row {
@@ -586,909 +728,497 @@
         gap: 12px;
       }
 
-      .slider-label {
+      .slider-channel-label {
         font-family: var(--mono);
-        font-size: 0.7rem;
-        color: var(--text-dim);
-        width: 16px;
-        letter-spacing: 0.05em;
+        font-size: 0.8rem;
+        font-weight: 700;
+        width: 14px;
+        flex-shrink: 0;
+        text-align: center;
       }
 
-      .color-slider {
+      .slider-track-wrap {
         flex: 1;
-        height: 4px;
-        border-radius: 0;
-        outline: none;
-        cursor: pointer;
-        -webkit-appearance: none;
-        appearance: none;
-        background: var(--border-bright);
-      }
-
-      .color-slider {
-        touch-action: pan-x;
-      }
-
-      .color-slider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 14px;
-        height: 14px;
-        background: var(--text);
-        cursor: pointer;
-        border: 2px solid var(--bg);
-      }
-
-      .color-slider::-moz-range-thumb {
-        width: 14px;
-        height: 14px;
-        background: var(--text);
-        cursor: pointer;
-        border: 2px solid var(--bg);
-        border-radius: 0;
-      }
-
-      .slider-val {
-        font-family: var(--mono);
-        font-size: 0.7rem;
-        color: var(--text-dim);
-        width: 32px;
-        text-align: right;
-        letter-spacing: 0.05em;
-      }
-
-      #r-slider {
-        background: linear-gradient(to right, #000, #ff0000);
-      }
-
-      #g-slider {
-        background: linear-gradient(to right, #000, #00ff00);
-      }
-
-      #b-slider {
-        background: linear-gradient(to right, #000, #0000ff);
-      }
-
-      .hex-input-row {
+        position: relative;
+        height: 28px;
         display: flex;
-        gap: 8px;
         align-items: center;
       }
 
+      .color-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 8px;
+        border-radius: 4px;
+        outline: none;
+        cursor: pointer;
+        touch-action: pan-x;
+        position: relative;
+        z-index: 1;
+      }
+      .color-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 26px;
+        height: 26px;
+        background: white;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid rgba(0,0,0,0.25);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        transition: transform 0.1s;
+      }
+      .color-slider:active::-webkit-slider-thumb { transform: scale(1.12); }
+      .color-slider::-moz-range-thumb {
+        width: 26px; height: 26px;
+        background: white;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid rgba(0,0,0,0.25);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      }
+
+      #r-slider { background: linear-gradient(to right, #1a0000, #ff0000); }
+      #g-slider { background: linear-gradient(to right, #001a00, #00ff00); }
+      #b-slider { background: linear-gradient(to right, #00001a, #0066ff); }
+
+      .slider-val {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        width: 34px;
+        text-align: right;
+        flex-shrink: 0;
+      }
+
+      /* Hex input row */
+      .hex-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .hex-input-wrap {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--surface2);
+        border: 1px solid var(--border-bright);
+        border-radius: var(--radius-sm);
+        padding: 10px 12px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .hex-input-wrap:focus-within {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-dim);
+      }
       .hex-prefix {
         font-family: var(--mono);
         font-size: 0.9rem;
         color: var(--text-muted);
       }
-
       .hex-input {
         flex: 1;
-        background: var(--surface2);
-        border: 1px solid var(--border-bright);
+        background: transparent;
+        border: none;
         color: var(--text);
         font-family: var(--mono);
-        font-size: 0.9rem;
-        padding: 8px 12px;
+        font-size: 1rem;
         outline: none;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        transition: border-color 0.2s;
-        max-width: 140px;
+        min-width: 0;
+      }
+      .hex-input::placeholder { color: var(--text-muted); }
+
+      /* Native color picker button */
+      .btn-eyedrop {
+        background: var(--surface2);
+        border: 1px solid var(--border-bright);
+        border-radius: var(--radius-sm);
+        padding: 10px 14px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 46px;
+        min-height: 46px;
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-eyedrop:active { transform: scale(0.95); }
+      #color-picker-native {
+        position: absolute; inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%; height: 100%;
       }
 
-      .hex-input:focus {
-        border-color: var(--accent);
-      }
-
-      /* Bottom bar */
+      /* Bottom action bar */
       .game-bottombar {
-        padding: 20px 40px;
+        flex-shrink: 0;
+        padding: 12px 16px;
         border-top: 1px solid var(--border);
+        background: var(--surface);
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 20px;
+        gap: 12px;
       }
 
-      .submit-status {
+      .status-pills {
+        flex: 1;
         display: flex;
-        gap: 16px;
-        align-items: center;
+        flex-direction: column;
+        gap: 5px;
       }
-
       .status-pill {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 7px;
         font-family: var(--mono);
-        font-size: 0.65rem;
-        letter-spacing: 0.1em;
+        font-size: 0.58rem;
+        letter-spacing: 0.08em;
         color: var(--text-muted);
       }
-
       .status-dot {
-        width: 6px;
-        height: 6px;
+        width: 6px; height: 6px;
         border-radius: 50%;
         background: var(--text-muted);
+        flex-shrink: 0;
       }
-
-      .status-dot.submitted {
-        background: var(--accent3);
-        box-shadow: 0 0 8px var(--accent3);
-      }
-
-      .status-dot.waiting-submit {
-        background: var(--text-muted);
-        animation: pulse 1.5s ease-in-out infinite;
-      }
+      .status-dot.submitted { background: var(--accent3); box-shadow: 0 0 6px var(--accent3); }
+      .status-dot.pulsing { animation: pulse 1.5s ease-in-out infinite; }
 
       .btn-submit {
         background: var(--accent);
-        color: #000;
+        color: #0a0a0f;
         border: none;
+        border-radius: var(--radius-sm);
         font-family: var(--display);
-        font-size: 1.2rem;
+        font-size: 1.15rem;
         letter-spacing: 0.1em;
-        padding: 12px 40px;
+        padding: 14px 22px;
+        min-height: 54px;
+        min-width: 140px;
         cursor: pointer;
-        transition: all 0.15s;
-        position: relative;
+        transition: all 0.18s;
+        white-space: nowrap;
+        flex-shrink: 0;
       }
-
+      .btn-submit:not(:disabled):active { transform: scale(0.96); }
+      .btn-submit:not(:disabled):hover { box-shadow: 0 4px 20px rgba(200,255,0,0.3); }
       .btn-submit:disabled {
-        opacity: 0.4;
+        opacity: 0.35;
         cursor: not-allowed;
         background: var(--border-bright);
         color: var(--text-dim);
+        box-shadow: none;
       }
 
-      .btn-submit:not(:disabled):hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 20px rgba(232, 255, 58, 0.3);
-      }
-
-      .btn-submit:not(:disabled):active {
-        transform: translateY(0);
-      }
-
-      /* ---- RESULT OVERLAY ---- */
+      /* ===== RESULT OVERLAY ===== */
       #result-overlay {
         display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(8, 8, 8, 0.95);
-        z-index: 100;
-        align-items: center;
-        justify-content: center;
+        position: fixed; inset: 0;
+        background: rgba(10,10,15,0.97);
+        z-index: 300;
         flex-direction: column;
-        gap: 32px;
-        padding: 40px 20px;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 20px;
+        padding: 36px 20px 40px;
+        overflow-y: auto;
       }
-
       #result-overlay.visible {
         display: flex;
-        animation: fadeIn 0.3s ease;
+        animation: fadeUp 0.35s cubic-bezier(0.16,1,0.3,1);
+      }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(14px); }
+        to { opacity: 1; transform: translateY(0); }
       }
 
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(10px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .result-round-label {
+      .result-label {
         font-family: var(--mono);
-        font-size: 0.65rem;
+        font-size: 0.6rem;
         color: var(--text-muted);
-        letter-spacing: 0.2em;
+        letter-spacing: 0.22em;
         text-transform: uppercase;
-      }
-
-      .result-title {
-        font-family: var(--display);
-        font-size: clamp(2rem, 8vw, 4rem);
-        letter-spacing: 0.05em;
         text-align: center;
       }
-
-      .result-colors {
-        display: flex;
-        gap: 32px;
-        align-items: flex-start;
-        flex-wrap: wrap;
-        justify-content: center;
+      .result-title {
+        font-family: var(--display);
+        font-size: clamp(2.2rem, 10vw, 4rem);
+        letter-spacing: 0.05em;
+        text-align: center;
+        line-height: 1;
       }
 
+      .result-swatches {
+        display: flex;
+        gap: 16px;
+        align-items: flex-end;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
       .result-color-block {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 12px;
-        min-width: 160px;
+        gap: 8px;
       }
-
       .result-color-block .label {
         font-family: var(--mono);
-        font-size: 0.6rem;
+        font-size: 0.58rem;
         color: var(--text-muted);
         letter-spacing: 0.15em;
         text-transform: uppercase;
       }
-
       .result-swatch {
-        width: 80px;
-        height: 80px;
-        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-sm);
+        border: 2px solid rgba(255,255,255,0.1);
         flex-shrink: 0;
       }
+      .result-swatch.target { width: 72px; height: 72px; }
+      .result-swatch.player { width: 56px; height: 56px; }
 
       .result-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
         width: 100%;
-        max-width: 600px;
+        max-width: 500px;
       }
-
       .result-card {
         background: var(--surface);
         border: 1px solid var(--border);
-        padding: 20px;
+        border-radius: var(--radius);
+        padding: 16px;
         position: relative;
+        overflow: hidden;
       }
-
-      .result-card.winner-card {
-        border-color: var(--accent);
-      }
-
+      .result-card.winner-card { border-color: var(--accent); }
       .result-card.winner-card::before {
         content: "WINNER";
-        position: absolute;
-        top: -1px;
-        right: 12px;
-        background: var(--accent);
-        color: #000;
-        font-family: var(--mono);
-        font-size: 0.55rem;
-        font-weight: 700;
-        letter-spacing: 0.15em;
+        position: absolute; top: -1px; right: 14px;
+        background: var(--accent); color: #0a0a0f;
+        font-family: var(--mono); font-size: 0.5rem;
+        font-weight: 700; letter-spacing: 0.18em;
         padding: 2px 8px;
+        border-radius: 0 0 6px 6px;
       }
-
       .result-card-name {
         font-family: var(--display);
-        font-size: 1.4rem;
+        font-size: 1.3rem;
         letter-spacing: 0.05em;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
       }
-
       .result-stat {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: 8px;
+        margin-top: 7px;
       }
-
       .result-stat-label {
         font-family: var(--mono);
-        font-size: 0.6rem;
+        font-size: 0.58rem;
         color: var(--text-muted);
         letter-spacing: 0.1em;
         text-transform: uppercase;
       }
-
       .result-stat-val {
         font-family: var(--mono);
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         color: var(--text);
       }
+      .result-stat-val.highlight { color: var(--accent); font-weight: 700; }
 
-      .result-stat-val.highlight {
-        color: var(--accent);
-        font-weight: 700;
+      .accuracy-bar-wrap {
+        width: 100%;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        margin-top: 6px;
+        overflow: hidden;
       }
-
-      .result-stat-val.speed {
-        color: var(--accent3);
+      .accuracy-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent3), var(--accent));
+        border-radius: 2px;
+        transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
       }
 
       .result-countdown {
         font-family: var(--mono);
-        font-size: 0.7rem;
+        font-size: 0.68rem;
         color: var(--text-muted);
-        letter-spacing: 0.1em;
+        letter-spacing: 0.12em;
+        text-align: center;
+        margin-top: 4px;
       }
 
-      /* ---- GAME OVER SCREEN ---- */
-      #gameover-screen {
-        gap: 40px;
-      }
+      /* ===== GAME OVER ===== */
+      #gameover-screen { gap: 32px; justify-content: center; }
 
       .gameover-title {
         font-family: var(--display);
-        font-size: clamp(3rem, 10vw, 6rem);
+        font-size: clamp(3.5rem, 14vw, 6rem);
         letter-spacing: 0.05em;
         text-align: center;
-        line-height: 1;
+        line-height: 0.9;
       }
 
       .final-podium {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 16px;
+        gap: 12px;
         width: 100%;
-        max-width: 480px;
+        max-width: 420px;
       }
-
       .podium-card {
         border: 1px solid var(--border);
-        padding: 28px 20px;
+        border-radius: var(--radius);
+        padding: 24px 16px;
         text-align: center;
-        position: relative;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
+        background: var(--surface);
       }
-
       .podium-card.first {
         border-color: var(--accent);
-        background: rgba(232, 255, 58, 0.03);
+        background: var(--surface2);
+        box-shadow: 0 0 30px rgba(200,255,0,0.06);
       }
-
       .podium-rank {
         font-family: var(--display);
-        font-size: 3rem;
-        color: var(--border-bright);
+        font-size: 2.8rem;
+        color: var(--text-muted);
         line-height: 1;
       }
-
-      .podium-card.first .podium-rank {
-        color: var(--accent);
-      }
-
+      .podium-card.first .podium-rank { color: var(--accent); }
       .podium-name {
         font-family: var(--display);
-        font-size: 1.6rem;
-        letter-spacing: 0.05em;
+        font-size: 1.4rem;
+        letter-spacing: 0.04em;
       }
-
       .podium-score {
         font-family: var(--mono);
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         color: var(--text-dim);
         letter-spacing: 0.1em;
       }
-
-      .podium-score span {
-        color: var(--text);
-        font-size: 1rem;
-      }
+      .podium-score span { color: var(--text); font-size: 0.9rem; }
 
       .gameover-btns {
         display: flex;
         flex-direction: column;
         gap: 10px;
         width: 100%;
-        max-width: 300px;
+        max-width: 360px;
       }
 
-      /* Submitted overlay on your swatch */
-      .submitted-overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.6);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--display);
-        font-size: 1.2rem;
-        letter-spacing: 0.1em;
-        color: var(--accent3);
-        opacity: 0;
-        transition: opacity 0.3s;
-      }
-
-      .submitted-overlay.visible {
-        opacity: 1;
-      }
-
-      /* Notification toast */
+      /* ===== TOAST ===== */
       .toast {
         position: fixed;
-        bottom: 32px;
-        left: 50%;
-        transform: translateX(-50%) translateY(20px);
-        background: var(--surface);
+        bottom: 24px;
+        left: 16px; right: 16px;
+        transform: translateY(20px);
+        background: var(--surface2);
         border: 1px solid var(--border-bright);
+        border-radius: var(--radius-sm);
         color: var(--text);
         font-family: var(--mono);
-        font-size: 0.75rem;
-        letter-spacing: 0.1em;
-        padding: 12px 24px;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        padding: 12px 18px;
         opacity: 0;
-        transition: all 0.3s;
-        z-index: 200;
-        white-space: nowrap;
+        transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+        z-index: 600;
+        text-align: center;
+        box-shadow: var(--shadow);
+      }
+      .toast.show { opacity: 1; transform: translateY(0); }
+
+      /* ===== COLOR PICKER NATIVE HIDDEN ===== */
+      #color-picker-native-standalone {
+        position: absolute; opacity: 0;
+        pointer-events: none; width: 1px; height: 1px;
       }
 
-      .toast.show {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-      }
-
-      /* Timer bar */
-      .timer-bar {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        height: 2px;
-        background: var(--accent);
-        transition: width linear;
-        width: 100%;
-      }
-
-      /* VS divider */
-      .vs-divider {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        font-family: var(--display);
-        font-size: 1rem;
-        color: var(--border-bright);
-        letter-spacing: 0.1em;
-        background: var(--bg);
-        padding: 8px;
-        z-index: 1;
-      }
-
-      /* ---- MOBILE OPTIMIZATIONS ---- */
-      @media (max-width: 768px) {
-        /* Header */
-        header {
-          padding: 12px 16px;
-        }
-
-        .logo {
-          font-size: 1.5rem;
-        }
-
-        .header-badge {
-          font-size: 0.55rem;
-          padding: 3px 7px;
-          letter-spacing: 0.08em;
-        }
-
-        /* Screens */
-        .screen.active {
-          padding: 24px 16px;
-        }
-
-        .screen {
-          min-height: calc(100vh - 57px);
-        }
-
-        /* Lobby */
-        #lobby-screen {
-          gap: 28px;
-        }
-
-        .hero-title {
-          font-size: clamp(2.5rem, 14vw, 4rem);
-          line-height: 0.88;
-        }
-
-        .hero-sub {
-          font-size: 0.65rem;
-          letter-spacing: 0.15em;
-        }
-
-        .lobby-card {
-          padding: 20px 16px;
-          max-width: 100%;
-        }
-
-        .form-input {
-          font-size: 1rem;
-          padding: 14px 14px;
-          margin-bottom: 16px;
-        }
-
-        .btn-primary {
-          font-size: 1.1rem;
-          padding: 16px 24px;
-          min-height: 52px;
-        }
-
-        .btn-secondary {
-          font-size: 1rem;
-          padding: 15px 24px;
-          min-height: 52px;
-        }
-
-        .how-to {
-          flex-direction: column;
-          gap: 10px;
-          max-width: 100%;
-        }
-
-        .how-step {
-          padding: 14px;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .step-num {
-          font-size: 2rem;
-          margin-bottom: 0;
-          min-width: 48px;
-          color: var(--accent);
-          opacity: 0.5;
-        }
-
-        .step-text {
-          font-size: 0.72rem;
-        }
-
-        /* Waiting screen */
-        #waiting-screen {
-          gap: 20px;
-        }
-
-        .room-code {
-          font-size: 2.2rem;
-          padding: 14px 28px;
-          letter-spacing: 0.15em;
-        }
-
-        .players-grid {
-          max-width: 100%;
-        }
-
-        .player-slot {
-          min-height: 80px;
-          padding: 16px 12px;
-        }
-
-        .player-slot-name {
-          font-size: 1.2rem;
-        }
-
-        /* Game screen */
-        .game-layout {
-          min-height: calc(100vh - 57px);
-          grid-template-rows: auto 1fr auto;
-        }
-
-        .game-topbar {
-          padding: 10px 14px;
-          gap: 8px;
-        }
-
-        .score-pts {
-          font-size: 1.6rem;
-        }
-
-        .score-name {
-          font-size: 0.55rem;
-        }
-
-        .round-num {
-          font-size: 1.2rem;
-        }
-
-        .game-main {
-          grid-template-columns: 1fr;
-          overflow-y: auto;
-        }
-
-        .target-panel {
-          border-right: none;
-          border-bottom: 1px solid var(--border);
-          padding: 18px 16px;
-          gap: 14px;
-          min-height: unset;
-        }
-
-        .target-label {
-          position: static;
-          margin-bottom: 0;
-          align-self: flex-start;
-        }
-
-        .picker-label {
-          position: static;
-          align-self: flex-start;
-        }
-
-        .target-swatch,
-        .your-swatch {
-          width: 100px;
-          height: 100px;
-        }
-
-        .target-hex {
-          font-size: 1rem;
-        }
-
-        .target-rgb {
-          font-size: 0.65rem;
-        }
-
-        .picker-panel {
-          padding: 18px 16px;
-          gap: 14px;
-        }
-
-        .picker-controls {
-          max-width: 100%;
-          width: 100%;
-          gap: 14px;
-        }
-
-        .color-slider {
-          height: 6px;
-        }
-
-        .color-slider::-webkit-slider-thumb {
-          width: 22px;
-          height: 22px;
-        }
-
-        .color-slider::-moz-range-thumb {
-          width: 22px;
-          height: 22px;
-        }
-
-        .slider-label {
-          font-size: 0.8rem;
-          width: 18px;
-        }
-
-        .slider-val {
-          font-size: 0.75rem;
-          width: 36px;
-        }
-
-        .hex-input {
-          font-size: 1rem;
-          padding: 10px 10px;
-          max-width: none;
-          flex: 1;
-        }
-
-        /* Bottom bar */
-        .game-bottombar {
-          padding: 12px 14px;
-          flex-wrap: nowrap;
-          gap: 12px;
-        }
-
-        .submit-status {
-          flex-direction: column;
-          gap: 6px;
-        }
-
-        .status-pill {
-          font-size: 0.58rem;
-        }
-
-        .btn-submit {
-          font-size: 1rem;
-          padding: 14px 20px;
-          min-height: 52px;
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-
-        .vs-divider {
-          display: none;
-        }
-
-        /* Result overlay */
-        #result-overlay {
-          gap: 20px;
-          padding: 24px 16px;
-          overflow-y: auto;
-          align-items: flex-start;
-          justify-content: flex-start;
-          padding-top: 40px;
-        }
-
-        .result-title {
-          font-size: clamp(1.8rem, 10vw, 3rem);
-        }
-
-        .result-colors {
-          gap: 16px;
-          flex-wrap: nowrap;
-        }
-
-        .result-color-block {
-          min-width: 100px;
-        }
-
-        .result-swatch {
-          width: 64px;
-          height: 64px;
-        }
-
-        .result-cards {
-          grid-template-columns: 1fr;
-          max-width: 100%;
-          width: 100%;
-        }
-
-        .result-card {
-          padding: 16px;
-        }
-
-        /* Game over screen */
-        #gameover-screen {
-          gap: 28px;
-        }
-
-        .final-podium {
-          max-width: 100%;
-        }
-
-        .podium-card {
-          padding: 20px 14px;
-        }
-
-        .podium-name {
-          font-size: 1.2rem;
-        }
-
-        .gameover-btns {
-          max-width: 100%;
-          width: 100%;
-        }
-
-        /* Toast */
-        .toast {
-          bottom: 16px;
-          left: 16px;
-          right: 16px;
-          transform: translateX(0) translateY(20px);
-          white-space: normal;
-          text-align: center;
-          font-size: 0.7rem;
-        }
-
-        .toast.show {
-          transform: translateX(0) translateY(0);
-        }
-      }
-
-      /* Extra small screens */
-      @media (max-width: 380px) {
-        .hero-title {
-          font-size: 2.2rem;
-        }
-
-        .logo {
-          font-size: 1.3rem;
-        }
-
-        .header-badge:not(#conn-status) {
-          display: none;
-        }
-
-        .target-swatch,
-        .your-swatch {
-          width: 80px;
-          height: 80px;
-        }
-
-        .game-topbar {
-          padding: 8px 10px;
-        }
-
-        .score-pts {
-          font-size: 1.4rem;
-        }
-
-        .btn-submit {
-          padding: 12px 14px;
-          font-size: 0.9rem;
-        }
-      }
-
-      /* Color picker native hidden */
-      #color-picker-native {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
-        width: 1px;
-        height: 1px;
-      }
-
-      .accuracy-bar-wrap {
-        width: 100%;
-        height: 3px;
-        background: var(--border);
-        margin-top: 4px;
-      }
-
-      .accuracy-bar-fill {
-        height: 100%;
-        background: var(--accent);
-        transition: width 0.5s ease;
-      }
-
-      /* Connecting state */
+      /* ===== CONNECTING STATE ===== */
       .connecting {
         font-family: var(--mono);
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         color: var(--text-muted);
         letter-spacing: 0.1em;
         text-align: center;
         padding: 20px;
       }
-
-      .blink {
-        animation: blink 1s step-end infinite;
-      }
-
-      @keyframes blink {
-        0%,
-        100% {
-          opacity: 1;
-        }
-        50% {
-          opacity: 0;
-        }
-      }
     </style>
   </head>
   <body>
+
     <!-- HEADER -->
     <header>
-      <div class="logo">QAR<span>DS</span></div>
-      <div class="header-badge">COLOR ACCURACY BATTLE</div>
-      <div class="header-badge" id="conn-status">● CONNECTING</div>
+      <div class="logo">CHRO<span>MATCH</span></div>
+      <div class="header-right">
+        <div class="conn-badge" id="conn-status">● CONNECTING</div>
+      </div>
     </header>
 
     <!-- TOAST -->
     <div class="toast" id="toast"></div>
 
+    <!-- ============ FULLSCREEN COLOR REVEAL ============ -->
+    <div id="color-reveal">
+      <div class="reveal-top-bar">
+        <div class="reveal-label" id="reveal-round-label">ROUND 1 / 5</div>
+        <div class="reveal-timer-ring">
+          <svg viewBox="0 0 52 52">
+            <circle class="ring-bg" cx="26" cy="26" r="22"/>
+            <circle class="ring-fill" id="reveal-ring" cx="26" cy="26" r="22"/>
+          </svg>
+          <div class="reveal-timer-num" id="reveal-timer-num">10</div>
+        </div>
+      </div>
+
+      <div class="reveal-center">
+        <div class="reveal-memorize-text">MEMORIZE THIS COLOR</div>
+        <div class="reveal-hex" id="reveal-hex">#FF6A3D</div>
+        <div class="reveal-rgb" id="reveal-rgb">
+          <span id="reveal-r">R: 255</span>
+          <span id="reveal-g">G: 106</span>
+          <span id="reveal-b">B: 61</span>
+        </div>
+        <div class="reveal-hint">IT WILL DISAPPEAR IN A MOMENT</div>
+      </div>
+
+      <div class="reveal-bottom-bar">
+        <div class="reveal-progress-bar" id="reveal-progress"></div>
+      </div>
+    </div>
+
     <!-- ============ LOBBY SCREEN ============ -->
     <div class="screen active" id="lobby-screen">
-      <div class="hero-title">
-        PICK THE<br />
-        <em>EXACT</em><br />
-        COLOR
+
+      <div class="hero-block">
+        <div class="hero-title">PICK THE<br/><em>EXACT</em><br/>COLOR</div>
+        <div class="hero-sub">2-player real-time color accuracy battle</div>
       </div>
-      <div class="hero-sub">2-player real-time color accuracy battle</div>
 
       <div class="lobby-card">
-        <label class="form-label">Your Name</label>
-        <input
-          type="text"
-          class="form-input"
-          id="player-name"
-          placeholder="Enter callsign..."
-          maxlength="16"
-        />
-
-        <label class="form-label">Room Code</label>
-        <input
-          type="text"
-          class="form-input"
-          id="room-code-input"
-          placeholder="Enter room code..."
-          maxlength="8"
-          style="text-transform: uppercase"
-        />
-
+        <div class="form-group">
+          <label class="form-label" for="player-name">Your Callsign</label>
+          <input type="text" class="form-input" id="player-name" placeholder="Enter name..." maxlength="16" autocomplete="off" />
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label" for="room-code-input">Room Code</label>
+          <input type="text" class="form-input" id="room-code-input" placeholder="e.g. ABC123" maxlength="8" style="text-transform:uppercase" autocomplete="off" />
+        </div>
         <button class="btn-primary" id="join-btn">JOIN ROOM</button>
         <button class="btn-secondary" id="create-btn">CREATE NEW ROOM</button>
       </div>
@@ -1496,32 +1226,25 @@
       <div class="how-to">
         <div class="how-step">
           <div class="step-num">01</div>
-          <div class="step-text">
-            A target color is shown for 10 seconds. Memorize it carefully — it will disappear!
-          </div>
+          <div class="step-text">A target color fills the screen for 10 seconds. Memorize it — it will vanish!</div>
         </div>
         <div class="how-step">
           <div class="step-num">02</div>
-          <div class="step-text">
-            Once hidden, recreate the color from memory using RGB sliders. No peeking!
-          </div>
+          <div class="step-text">Recreate the color from memory using RGB sliders. No peeking!</div>
         </div>
         <div class="how-step">
           <div class="step-num">03</div>
-          <div class="step-text">
-            Submit first for a speed bonus. Best memory wins the round!
-          </div>
+          <div class="step-text">Submit first for a speed bonus. Best memory wins the round!</div>
         </div>
       </div>
+
     </div>
 
     <!-- ============ WAITING SCREEN ============ -->
     <div class="screen" id="waiting-screen">
-      <div class="waiting-room-id">ROOM CODE</div>
-      <div class="room-code" id="display-room-code" title="Click to copy">
-        ----
-      </div>
-      <div class="copy-hint">CLICK TO COPY</div>
+      <div class="room-code-label">ROOM CODE</div>
+      <div class="room-code" id="display-room-code" title="Tap to copy">----</div>
+      <div class="copy-hint">TAP TO COPY</div>
 
       <div class="players-grid">
         <div class="player-slot" id="p1-slot">
@@ -1536,20 +1259,18 @@
         </div>
       </div>
 
-      <div
-        class="connecting"
-        id="waiting-msg"
-      >
-        SHARE THE ROOM CODE WITH YOUR OPPONENT<span class="blink">_</span>
+      <div class="waiting-msg" id="waiting-msg">
+        SHARE THE CODE WITH YOUR OPPONENT<span class="blink">_</span>
       </div>
     </div>
 
     <!-- ============ GAME SCREEN ============ -->
     <div class="screen" id="game-screen">
       <div class="game-layout">
-        <!-- Top bar -->
+
+        <!-- Scorebar -->
         <div class="game-topbar">
-          <div class="score-block" id="my-score-block">
+          <div class="score-block">
             <div class="score-name" id="my-score-name">YOU</div>
             <div class="score-pts you" id="my-score">0</div>
           </div>
@@ -1557,123 +1278,115 @@
             <div class="round-label">ROUND</div>
             <div class="round-num" id="round-display">1 / 5</div>
           </div>
-          <div class="score-block right" id="opp-score-block">
-            <div class="score-name" id="opp-score-name">OPPONENT</div>
+          <div class="score-block right">
+            <div class="score-name" id="opp-score-name">OPP</div>
             <div class="score-pts" id="opp-score">0</div>
           </div>
         </div>
 
-        <!-- Main area -->
-        <div class="game-main" style="position: relative">
-          <div class="vs-divider">VS</div>
+        <!-- Main content -->
+        <div class="game-content">
 
-          <!-- Target -->
-          <div class="target-panel">
-            <div class="target-label" id="target-label-text">TARGET COLOR</div>
-            <div class="target-swatch" id="target-swatch" style="transition: background 0.3s, opacity 0.5s;"></div>
-            <div class="target-hex" id="target-hex" style="transition: opacity 0.5s;">#------</div>
-            <div class="target-rgb" id="target-rgb" style="transition: opacity 0.5s;">R:--- G:--- B:---</div>
+          <!-- Target strip -->
+          <div class="target-strip">
+            <div class="target-strip-swatch" id="target-swatch"></div>
+            <div class="target-strip-info">
+              <span class="target-strip-label">TARGET COLOR</span>
+              <div class="target-strip-hex" id="target-hex">#------</div>
+            </div>
+            <div class="target-strip-state memorizing" id="target-strip-state">MEMORIZE</div>
           </div>
 
-          <!-- Picker -->
-          <div class="picker-panel">
-            <div class="picker-label">YOUR PICK</div>
+          <!-- Picker area -->
+          <div class="picker-area">
 
-            <div class="your-swatch" id="your-swatch">
-              <div class="submitted-overlay" id="submitted-overlay">
-                SUBMITTED ✓
+            <!-- Live preview -->
+            <div class="color-preview-row">
+              <div class="your-swatch-wrap" id="your-swatch-wrap">
+                <div class="your-swatch" id="your-swatch"></div>
+                <div class="submitted-overlay" id="submitted-overlay">
+                  <span>✓</span>
+                  <span style="font-size:0.9rem">LOCKED IN</span>
+                </div>
+              </div>
+              <div class="your-hex-label">
+                <span class="your-label-text">YOUR COLOR</span>
+                <div class="your-hex-val" id="your-hex-display">#808080</div>
+                <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text-muted);margin-top:2px" id="your-rgb-display">R:128 G:128 B:128</div>
               </div>
             </div>
 
-            <div class="picker-controls">
+            <!-- Sliders -->
+            <div class="sliders-card">
               <div class="slider-row">
-                <span class="slider-label" style="color: #ff5555">R</span>
-                <input
-                  type="range"
-                  class="color-slider"
-                  id="r-slider"
-                  min="0"
-                  max="255"
-                  value="128"
-                />
+                <span class="slider-channel-label" style="color:#ff5555">R</span>
+                <div class="slider-track-wrap">
+                  <input type="range" class="color-slider" id="r-slider" min="0" max="255" value="128" />
+                </div>
                 <span class="slider-val" id="r-val">128</span>
               </div>
               <div class="slider-row">
-                <span class="slider-label" style="color: #55ff55">G</span>
-                <input
-                  type="range"
-                  class="color-slider"
-                  id="g-slider"
-                  min="0"
-                  max="255"
-                  value="128"
-                />
+                <span class="slider-channel-label" style="color:#44ff88">G</span>
+                <div class="slider-track-wrap">
+                  <input type="range" class="color-slider" id="g-slider" min="0" max="255" value="128" />
+                </div>
                 <span class="slider-val" id="g-val">128</span>
               </div>
               <div class="slider-row">
-                <span class="slider-label" style="color: #5555ff">B</span>
-                <input
-                  type="range"
-                  class="color-slider"
-                  id="b-slider"
-                  min="0"
-                  max="255"
-                  value="128"
-                />
+                <span class="slider-channel-label" style="color:#5599ff">B</span>
+                <div class="slider-track-wrap">
+                  <input type="range" class="color-slider" id="b-slider" min="0" max="255" value="128" />
+                </div>
                 <span class="slider-val" id="b-val">128</span>
               </div>
 
-              <div class="hex-input-row">
-                <span class="hex-prefix">#</span>
-                <input
-                  type="text"
-                  class="hex-input"
-                  id="hex-text-input"
-                  maxlength="6"
-                  placeholder="808080"
-                />
-                <input type="color" id="color-picker-native" />
+              <!-- Hex row -->
+              <div class="hex-row">
+                <div class="hex-input-wrap">
+                  <span class="hex-prefix">#</span>
+                  <input type="text" class="hex-input" id="hex-text-input" maxlength="6" placeholder="808080" autocomplete="off" />
+                </div>
+                <button class="btn-eyedrop" title="Open color picker">
+                  🎨
+                  <input type="color" id="color-picker-native" value="#808080" />
+                </button>
               </div>
             </div>
-          </div>
-        </div>
+
+          </div><!-- /picker-area -->
+
+        </div><!-- /game-content -->
 
         <!-- Bottom bar -->
         <div class="game-bottombar">
-          <div class="submit-status">
-            <div class="status-pill" id="my-status-pill">
-              <div class="status-dot waiting-submit" id="my-dot"></div>
-              <span id="my-status-text">YOU — PICKING</span>
+          <div class="status-pills">
+            <div class="status-pill">
+              <div class="status-dot pulsing" id="my-dot"></div>
+              <span id="my-status-text">YOU — MEMORIZING</span>
             </div>
-            <div class="status-pill" id="opp-status-pill">
-              <div class="status-dot waiting-submit" id="opp-dot"></div>
-              <span id="opp-status-text">OPP — PICKING</span>
+            <div class="status-pill">
+              <div class="status-dot pulsing" id="opp-dot"></div>
+              <span id="opp-status-text">OPP — MEMORIZING</span>
             </div>
           </div>
-          <button class="btn-submit" id="submit-btn">LOCK IN COLOR</button>
+          <button class="btn-submit" id="submit-btn" disabled>LOCK IN</button>
         </div>
+
       </div>
     </div>
 
     <!-- ============ RESULT OVERLAY ============ -->
     <div id="result-overlay">
-      <div class="result-round-label" id="result-round-label">ROUND 1 RESULT</div>
+      <div class="result-label" id="result-round-label">ROUND 1 / 5 RESULT</div>
       <div class="result-title" id="result-title">ROUND OVER</div>
 
-      <div class="result-colors">
+      <div class="result-swatches">
         <div class="result-color-block">
           <div class="label">TARGET</div>
-          <div class="result-swatch" id="result-target-swatch"></div>
-          <div
-            style="
-              font-family: var(--mono);
-              font-size: 0.75rem;
-              color: var(--text-dim);
-            "
-            id="result-target-hex"
-          ></div>
+          <div class="result-swatch target" id="result-target-swatch"></div>
+          <div style="font-family:var(--mono);font-size:0.7rem;color:var(--text-dim)" id="result-target-hex"></div>
         </div>
-        <div id="result-player-swatches" style="display: flex; gap: 24px; flex-wrap: wrap; justify-content: center"></div>
+        <div id="result-player-swatches" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:flex-end"></div>
       </div>
 
       <div class="result-cards" id="result-cards"></div>
@@ -1682,7 +1395,7 @@
 
     <!-- ============ GAME OVER SCREEN ============ -->
     <div class="screen" id="gameover-screen">
-      <div class="gameover-title" id="gameover-title">GAME<br /><span style="color:var(--accent)">OVER</span></div>
+      <div class="gameover-title" id="gameover-title">GAME<br/><span style="color:var(--accent)">OVER</span></div>
       <div class="final-podium" id="final-podium"></div>
       <div class="gameover-btns">
         <button class="btn-primary" id="play-again-btn">PLAY AGAIN</button>
@@ -1697,13 +1410,13 @@
       let myRoomId = null;
       let currentR = 128, currentG = 128, currentB = 128;
       let hasSubmitted = false;
-      let opponentSubmitted = false;
-      let roundStartTime = null;
+      let memorizeInterval = null;
       let countdownInterval = null;
+      let revealTimerInterval = null;
 
-      // ============ UI HELPERS ============
+      // ============ HELPERS ============
       function showScreen(id) {
-        document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+        document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
         document.getElementById(id).classList.add("active");
       }
 
@@ -1715,7 +1428,7 @@
       }
 
       function rgbToHex(r, g, b) {
-        return "#" + [r, g, b].map((x) => x.toString(16).padStart(2, "0").toUpperCase()).join("");
+        return "#" + [r, g, b].map(x => x.toString(16).padStart(2, "0").toUpperCase()).join("");
       }
 
       function hexToRgb(hex) {
@@ -1729,7 +1442,6 @@
       }
 
       function updateMyColor(r, g, b) {
-        currentR = r; currentG = b; currentB = b;
         currentR = Math.max(0, Math.min(255, r));
         currentG = Math.max(0, Math.min(255, g));
         currentB = Math.max(0, Math.min(255, b));
@@ -1742,6 +1454,91 @@
         document.getElementById("g-val").textContent = currentG;
         document.getElementById("b-val").textContent = currentB;
         document.getElementById("hex-text-input").value = hex.replace("#", "");
+        document.getElementById("your-hex-display").textContent = hex;
+        document.getElementById("your-rgb-display").textContent = `R:${currentR} G:${currentG} B:${currentB}`;
+        document.getElementById("color-picker-native").value = hex;
+      }
+
+      // ============ FULLSCREEN REVEAL ============
+      function showColorReveal(targetColor, round, maxRounds, memorizeSeconds) {
+        const reveal = document.getElementById("color-reveal");
+
+        // Set background to the target color
+        reveal.style.background = targetColor.hex;
+
+        // Determine text color contrast
+        const brightness = (targetColor.r * 299 + targetColor.g * 587 + targetColor.b * 114) / 1000;
+        const textColor = brightness > 140 ? "rgba(0,0,0,0.85)" : "rgba(255,255,255,0.92)";
+        const subTextColor = brightness > 140 ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)";
+
+        // Apply contrast colors
+        reveal.querySelectorAll(".reveal-memorize-text, .reveal-hex, .reveal-timer-num, .reveal-label").forEach(el => {
+          el.style.color = textColor;
+        });
+        reveal.querySelectorAll(".reveal-rgb span, .reveal-hint").forEach(el => {
+          el.style.color = subTextColor;
+        });
+        document.querySelector(".ring-bg").style.stroke = brightness > 140 ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.15)";
+        document.querySelector(".ring-fill").style.stroke = brightness > 140 ? "rgba(0,0,0,0.85)" : "rgba(255,255,255,0.85)";
+        document.querySelector(".reveal-bottom-bar").style.background = brightness > 140 ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.15)";
+        document.querySelector(".reveal-progress-bar").style.background = brightness > 140 ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.85)";
+
+        // Set content
+        document.getElementById("reveal-round-label").textContent = `ROUND ${round} / ${maxRounds}`;
+        document.getElementById("reveal-hex").textContent = targetColor.hex;
+        document.getElementById("reveal-r").textContent = `R: ${targetColor.r}`;
+        document.getElementById("reveal-g").textContent = `G: ${targetColor.g}`;
+        document.getElementById("reveal-b").textContent = `B: ${targetColor.b}`;
+
+        // Ring setup: circumference = 2πr = 2π*22 ≈ 138.23
+        const CIRC = 138.23;
+        const ring = document.getElementById("reveal-ring");
+        ring.style.strokeDashoffset = "0";
+        ring.style.transition = "none";
+
+        // Progress bar
+        const bar = document.getElementById("reveal-progress");
+        bar.style.transition = "none";
+        bar.style.transform = "scaleX(1)";
+        bar.style.transformOrigin = "left";
+
+        // Show
+        reveal.classList.add("active");
+
+        // Animate after frame
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            ring.style.transition = `stroke-dashoffset ${memorizeSeconds}s linear`;
+            ring.style.strokeDashoffset = CIRC.toString();
+            bar.style.transition = `transform ${memorizeSeconds}s linear`;
+            bar.style.transform = "scaleX(0)";
+          });
+        });
+
+        // Countdown number
+        let secsLeft = memorizeSeconds;
+        document.getElementById("reveal-timer-num").textContent = secsLeft;
+        clearInterval(revealTimerInterval);
+        revealTimerInterval = setInterval(() => {
+          secsLeft--;
+          if (secsLeft > 0) {
+            document.getElementById("reveal-timer-num").textContent = secsLeft;
+          } else {
+            clearInterval(revealTimerInterval);
+          }
+        }, 1000);
+      }
+
+      function hideColorReveal() {
+        clearInterval(revealTimerInterval);
+        const reveal = document.getElementById("color-reveal");
+        reveal.style.opacity = "0";
+        reveal.style.transition = "opacity 0.4s ease";
+        setTimeout(() => {
+          reveal.classList.remove("active");
+          reveal.style.opacity = "";
+          reveal.style.transition = "";
+        }, 400);
       }
 
       // ============ LOBBY ============
@@ -1759,7 +1556,7 @@
         socket.emit("join_room", { roomId, playerName: name });
       });
 
-      document.getElementById("room-code-input").addEventListener("keydown", (e) => {
+      document.getElementById("room-code-input").addEventListener("keydown", e => {
         if (e.key === "Enter") document.getElementById("join-btn").click();
       });
 
@@ -1769,20 +1566,19 @@
       });
 
       function updatePlayerSlots(players) {
-        const slots = ["p1-slot", "p2-slot"];
-        slots.forEach((id, i) => {
+        ["p1-slot", "p2-slot"].forEach((id, i) => {
           const slot = document.getElementById(id);
           if (players[i]) {
             slot.classList.add("filled");
             slot.innerHTML = `
-              <div class="player-slot-label">Player ${i + 1}</div>
+              <div class="player-slot-label">Player ${i+1}</div>
               <div class="pulse-dot"></div>
               <div class="player-slot-name">${players[i].name}</div>
             `;
           } else {
             slot.classList.remove("filled");
             slot.innerHTML = `
-              <div class="player-slot-label">Player ${i + 1}</div>
+              <div class="player-slot-label">Player ${i+1}</div>
               <div class="pulse-dot"></div>
               <div class="player-slot-empty">Waiting...</div>
             `;
@@ -1790,22 +1586,25 @@
         });
       }
 
-      // ============ COLOR SLIDERS ============
+      // ============ SLIDERS ============
       function setupSliders() {
-        ["r", "g", "b"].forEach((ch) => {
-          document.getElementById(`${ch}-slider`).addEventListener("input", (e) => {
+        ["r", "g", "b"].forEach(ch => {
+          document.getElementById(`${ch}-slider`).addEventListener("input", () => {
             if (hasSubmitted) return;
             currentR = parseInt(document.getElementById("r-slider").value);
             currentG = parseInt(document.getElementById("g-slider").value);
             currentB = parseInt(document.getElementById("b-slider").value);
-            document.getElementById(`${ch}-val`).textContent = e.target.value;
             const hex = rgbToHex(currentR, currentG, currentB);
             document.getElementById("your-swatch").style.background = hex;
+            document.getElementById(`${ch}-val`).textContent = document.getElementById(`${ch}-slider`).value;
             document.getElementById("hex-text-input").value = hex.replace("#", "");
+            document.getElementById("your-hex-display").textContent = hex;
+            document.getElementById("your-rgb-display").textContent = `R:${currentR} G:${currentG} B:${currentB}`;
+            document.getElementById("color-picker-native").value = hex;
           });
         });
 
-        document.getElementById("hex-text-input").addEventListener("input", (e) => {
+        document.getElementById("hex-text-input").addEventListener("input", e => {
           if (hasSubmitted) return;
           const rgb = hexToRgb(e.target.value);
           if (rgb) {
@@ -1816,8 +1615,18 @@
             document.getElementById("r-val").textContent = rgb.r;
             document.getElementById("g-val").textContent = rgb.g;
             document.getElementById("b-val").textContent = rgb.b;
-            document.getElementById("your-swatch").style.background = "#" + e.target.value;
+            const hex = "#" + e.target.value.toUpperCase();
+            document.getElementById("your-swatch").style.background = hex;
+            document.getElementById("your-hex-display").textContent = hex;
+            document.getElementById("your-rgb-display").textContent = `R:${rgb.r} G:${rgb.g} B:${rgb.b}`;
+            document.getElementById("color-picker-native").value = hex;
           }
+        });
+
+        document.getElementById("color-picker-native").addEventListener("input", e => {
+          if (hasSubmitted) return;
+          const rgb = hexToRgb(e.target.value);
+          if (rgb) updateMyColor(rgb.r, rgb.g, rgb.b);
         });
       }
 
@@ -1829,29 +1638,28 @@
         hasSubmitted = true;
         document.getElementById("submit-btn").disabled = true;
         document.getElementById("submitted-overlay").classList.add("visible");
-        document.getElementById("my-dot").classList.remove("waiting-submit");
+        document.getElementById("my-dot").classList.remove("pulsing");
         document.getElementById("my-dot").classList.add("submitted");
         document.getElementById("my-status-text").textContent = "YOU — LOCKED IN ✓";
-
-        socket.emit("submit_color", {
-          color: { r: currentR, g: currentG, b: currentB },
-        });
+        socket.emit("submit_color", { color: { r: currentR, g: currentG, b: currentB } });
       });
 
       // ============ SOCKET EVENTS ============
       socket.on("connect", () => {
-        document.getElementById("conn-status").textContent = "● CONNECTED";
-        document.getElementById("conn-status").style.color = "#3affcb";
+        const badge = document.getElementById("conn-status");
+        badge.textContent = "● CONNECTED";
+        badge.classList.add("connected");
       });
 
       socket.on("disconnect", () => {
-        document.getElementById("conn-status").textContent = "● OFFLINE";
-        document.getElementById("conn-status").style.color = "#ff3a6e";
+        const badge = document.getElementById("conn-status");
+        badge.textContent = "● OFFLINE";
+        badge.classList.remove("connected");
+        badge.style.color = "var(--accent2)";
+        badge.style.borderColor = "var(--accent2)";
       });
 
-      socket.on("error", ({ message }) => {
-        showToast("⚠ " + message);
-      });
+      socket.on("error", ({ message }) => showToast("⚠ " + message));
 
       socket.on("joined", ({ player, roomId }) => {
         myPlayer = player;
@@ -1859,68 +1667,63 @@
         document.getElementById("display-room-code").textContent = roomId;
         document.getElementById("my-score-name").textContent = player.name.toUpperCase();
         showScreen("waiting-screen");
-        showToast(`Joined room ${roomId} as ${player.name}`);
+        showToast(`Joined room ${roomId}`);
       });
 
       socket.on("player_update", ({ players }) => {
         updatePlayerSlots(players);
         if (players.length === 2) {
-          document.getElementById("waiting-msg").innerHTML = "BOTH PLAYERS READY — GAME STARTING<span class='blink'>_</span>";
-          // Set opponent name
-          const opp = players.find((p) => p.id !== myPlayer?.id);
+          document.getElementById("waiting-msg").innerHTML = "BOTH PLAYERS READY — STARTING<span class='blink'>_</span>";
+          const opp = players.find(p => p.id !== myPlayer?.id);
           if (opp) document.getElementById("opp-score-name").textContent = opp.name.toUpperCase();
         }
       });
 
-      let memorizeTimer = null;
-      let memorizeInterval = null;
-
       socket.on("memorize_start", ({ round, maxRounds, targetColor, scores, memorizeSeconds }) => {
         hasSubmitted = false;
-        opponentSubmitted = false;
 
         // Reset UI
         document.getElementById("submit-btn").disabled = true;
         document.getElementById("submitted-overlay").classList.remove("visible");
-        document.getElementById("my-dot").className = "status-dot waiting-submit";
-        document.getElementById("opp-dot").className = "status-dot waiting-submit";
+        document.getElementById("my-dot").className = "status-dot pulsing";
+        document.getElementById("opp-dot").className = "status-dot pulsing";
         document.getElementById("my-status-text").textContent = "YOU — MEMORIZING";
         document.getElementById("opp-status-text").textContent = "OPP — MEMORIZING";
 
-        // Update scores
         updateScores(scores);
 
-        // Show target color info
-        const hex = targetColor.hex;
-        document.getElementById("target-swatch").style.background = hex;
-        document.getElementById("target-hex").textContent = hex;
-        document.getElementById("target-rgb").textContent = `R:${targetColor.r} G:${targetColor.g} B:${targetColor.b}`;
+        // Game screen target strip
+        document.getElementById("target-swatch").style.background = targetColor.hex;
         document.getElementById("target-swatch").style.opacity = "1";
-        document.getElementById("target-hex").style.opacity = "1";
-        document.getElementById("target-rgb").style.opacity = "1";
+        document.getElementById("target-hex").textContent = targetColor.hex;
         document.getElementById("round-display").textContent = `${round} / ${maxRounds}`;
 
-        // Update target label to show memorize countdown
-        document.getElementById("target-label-text").textContent = `MEMORIZE — ${memorizeSeconds}s`;
+        const stateEl = document.getElementById("target-strip-state");
+        stateEl.textContent = `MEMORIZE ${memorizeSeconds}s`;
+        stateEl.className = "target-strip-state memorizing";
 
-        // Random starting color for picker (hidden/disabled)
-        const sr = Math.floor(Math.random() * 256);
-        const sg = Math.floor(Math.random() * 256);
-        const sb = Math.floor(Math.random() * 256);
-        updateMyColor(sr, sg, sb);
+        // Random starting picker color
+        updateMyColor(
+          Math.floor(Math.random() * 256),
+          Math.floor(Math.random() * 256),
+          Math.floor(Math.random() * 256)
+        );
 
-        // Hide result overlay
         document.getElementById("result-overlay").classList.remove("visible");
 
+        // Show game screen first (behind the overlay)
         showScreen("game-screen");
 
-        // Client-side countdown display
+        // Show fullscreen reveal
+        showColorReveal(targetColor, round, maxRounds, memorizeSeconds);
+
+        // Countdown the strip label too
         let secsLeft = memorizeSeconds;
         clearInterval(memorizeInterval);
         memorizeInterval = setInterval(() => {
           secsLeft--;
           if (secsLeft > 0) {
-            document.getElementById("target-label-text").textContent = `MEMORIZE — ${secsLeft}s`;
+            stateEl.textContent = `MEMORIZE ${secsLeft}s`;
           } else {
             clearInterval(memorizeInterval);
           }
@@ -1929,30 +1732,30 @@
 
       socket.on("memorize_end", () => {
         clearInterval(memorizeInterval);
+        hideColorReveal();
 
-        // Hide the target color
-        document.getElementById("target-swatch").style.background = "#111111";
-        document.getElementById("target-swatch").style.opacity = "0.15";
-        document.getElementById("target-hex").style.opacity = "0";
-        document.getElementById("target-rgb").style.opacity = "0";
-        document.getElementById("target-label-text").textContent = "TARGET HIDDEN — RECALL!";
+        // Hide target in strip
+        document.getElementById("target-swatch").style.background = "#1a1a24";
+        document.getElementById("target-swatch").style.opacity = "0.3";
+        document.getElementById("target-hex").textContent = "HIDDEN";
+        document.getElementById("target-hex").style.color = "var(--text-muted)";
 
-        // Enable picker and submit
+        const stateEl = document.getElementById("target-strip-state");
+        stateEl.textContent = "RECALL!";
+        stateEl.className = "target-strip-state hidden";
+
         document.getElementById("submit-btn").disabled = false;
         document.getElementById("my-status-text").textContent = "YOU — PICKING";
         document.getElementById("opp-status-text").textContent = "OPP — PICKING";
 
-        roundStartTime = Date.now();
         showToast("🎨 Color hidden! Match from memory!");
       });
 
       socket.on("player_submitted", ({ playerId, submissionOrder, totalPlayers }) => {
-        const isMe = playerId === socket.id;
-        if (!isMe) {
-          opponentSubmitted = true;
+        if (playerId !== socket.id) {
           document.getElementById("opp-dot").className = "status-dot submitted";
           document.getElementById("opp-status-text").textContent = "OPP — LOCKED IN ✓";
-          showToast(`Opponent submitted! (${submissionOrder}/${totalPlayers})`);
+          showToast(`Opponent locked in! (${submissionOrder}/${totalPlayers})`);
         }
       });
 
@@ -1960,9 +1763,7 @@
         showRoundResult(results, targetColor, round, maxRounds);
       });
 
-      socket.on("game_over", ({ finalResults }) => {
-        showGameOver(finalResults);
-      });
+      socket.on("game_over", ({ finalResults }) => showGameOver(finalResults));
 
       socket.on("player_disconnected", ({ players }) => {
         showToast("⚠ Opponent disconnected!");
@@ -1972,51 +1773,44 @@
       // ============ SCORE UPDATE ============
       function updateScores(scores) {
         if (!myPlayer) return;
-        const myScore = scores[socket.id] || 0;
-        document.getElementById("my-score").textContent = myScore;
-
-        // Find opponent score
-        const oppId = Object.keys(scores).find((id) => id !== socket.id);
-        if (oppId) {
-          document.getElementById("opp-score").textContent = scores[oppId] || 0;
-        }
+        document.getElementById("my-score").textContent = scores[socket.id] || 0;
+        const oppId = Object.keys(scores).find(id => id !== socket.id);
+        if (oppId) document.getElementById("opp-score").textContent = scores[oppId] || 0;
       }
 
       // ============ ROUND RESULT ============
       function showRoundResult(results, targetColor, round, maxRounds) {
         document.getElementById("result-round-label").textContent = `ROUND ${round} / ${maxRounds} RESULT`;
 
-        // Determine winner
         const winner = results[0];
         const isWinner = winner.playerId === socket.id;
-        document.getElementById("result-title").textContent = isWinner ? "YOU WIN THE ROUND!" : winner.accuracy === results[1]?.accuracy ? "IT'S A TIE!" : "OPPONENT WINS!";
-        document.getElementById("result-title").style.color = isWinner ? "var(--accent)" : "var(--text)";
+        const isTie = results.length > 1 && winner.accuracy === results[1]?.accuracy;
 
-        // Target swatch
+        document.getElementById("result-title").textContent = isTie ? "IT'S A TIE!" : isWinner ? "YOU WIN! 🎯" : "OPPONENT WINS";
+        document.getElementById("result-title").style.color = isWinner && !isTie ? "var(--accent)" : "var(--text)";
+
         document.getElementById("result-target-swatch").style.background = targetColor.hex;
         document.getElementById("result-target-hex").textContent = targetColor.hex;
 
-        // Player swatches
         const swatchCont = document.getElementById("result-player-swatches");
         swatchCont.innerHTML = "";
-        results.forEach((r) => {
+        results.forEach(r => {
+          const hex = rgbToHex(r.color.r, r.color.g, r.color.b);
           const div = document.createElement("div");
           div.className = "result-color-block";
-          const hex = rgbToHex(r.color.r, r.color.g, r.color.b);
           div.innerHTML = `
             <div class="label">${r.playerName.toUpperCase()}</div>
-            <div class="result-swatch" style="background:${hex}"></div>
-            <div style="font-family:var(--mono);font-size:0.75rem;color:var(--text-dim)">${hex}</div>
+            <div class="result-swatch player" style="background:${hex}"></div>
+            <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-dim)">${hex}</div>
           `;
           swatchCont.appendChild(div);
         });
 
-        // Result cards
         const cardsCont = document.getElementById("result-cards");
         cardsCont.innerHTML = "";
         results.forEach((r, i) => {
-          const card = document.createElement("div");
           const isMe = r.playerId === socket.id;
+          const card = document.createElement("div");
           card.className = "result-card" + (i === 0 ? " winner-card" : "");
           card.innerHTML = `
             <div class="result-card-name">${r.playerName.toUpperCase()}${isMe ? " (YOU)" : ""}</div>
@@ -2025,11 +1819,11 @@
               <span class="result-stat-val highlight">${r.accuracy}%</span>
             </div>
             <div class="accuracy-bar-wrap">
-              <div class="accuracy-bar-fill" style="width:${r.accuracy}%"></div>
+              <div class="accuracy-bar-fill" style="width:0%"></div>
             </div>
             <div class="result-stat">
               <span class="result-stat-label">ROUND SCORE</span>
-              <span class="result-stat-val">+${r.roundScore}${r.speedBonus ? ` <span style="color:var(--accent3);font-size:0.7rem">(+${r.speedBonus} SPEED)</span>` : ""}</span>
+              <span class="result-stat-val">+${r.roundScore}${r.speedBonus ? ` <span style="color:var(--accent3);font-size:0.65rem">(+${r.speedBonus} SPEED)</span>` : ""}</span>
             </div>
             <div class="result-stat">
               <span class="result-stat-label">TOTAL</span>
@@ -2037,14 +1831,20 @@
             </div>
             <div class="result-stat">
               <span class="result-stat-label">TIME</span>
-              <span class="result-stat-val" style="color:var(--text-dim)">${(r.timeTaken / 1000).toFixed(1)}s</span>
+              <span class="result-stat-val" style="color:var(--text-dim)">${(r.timeTaken/1000).toFixed(1)}s</span>
             </div>
-            ${r.submittedFirst ? `<div style="margin-top:8px;font-family:var(--mono);font-size:0.6rem;color:var(--accent3);letter-spacing:0.1em">⚡ SUBMITTED FIRST</div>` : ""}
+            ${r.submittedFirst ? `<div style="margin-top:8px;font-family:var(--mono);font-size:0.58rem;color:var(--accent3);letter-spacing:0.1em">⚡ FIRST SUBMIT</div>` : ""}
           `;
           cardsCont.appendChild(card);
         });
 
-        // Countdown
+        // Animate accuracy bars
+        setTimeout(() => {
+          cardsCont.querySelectorAll(".accuracy-bar-fill").forEach((bar, i) => {
+            bar.style.width = results[i].accuracy + "%";
+          });
+        }, 100);
+
         let cdSecs = round < maxRounds ? 5 : 4;
         const cdEl = document.getElementById("result-countdown");
         cdEl.textContent = round < maxRounds ? `NEXT ROUND IN ${cdSecs}...` : `GAME OVER IN ${cdSecs}...`;
@@ -2064,12 +1864,10 @@
         clearInterval(countdownInterval);
         document.getElementById("result-overlay").classList.remove("visible");
 
-        const myResult = finalResults.find((r) => r.playerId === socket.id);
         const isWinner = finalResults[0].playerId === socket.id;
-
         document.getElementById("gameover-title").innerHTML = isWinner
-          ? `YOU<br /><span style="color:var(--accent)">WIN!</span>`
-          : `GAME<br /><span style="color:var(--accent)">OVER</span>`;
+          ? `YOU<br/><span style="color:var(--accent)">WIN!</span>`
+          : `GAME<br/><span style="color:var(--accent)">OVER</span>`;
 
         const podium = document.getElementById("final-podium");
         podium.innerHTML = "";
@@ -2077,10 +1875,10 @@
           const card = document.createElement("div");
           card.className = "podium-card" + (i === 0 ? " first" : "");
           card.innerHTML = `
-            <div class="podium-rank">#${i + 1}</div>
+            <div class="podium-rank">#${i+1}</div>
             <div class="podium-name">${r.playerName.toUpperCase()}</div>
             <div class="podium-score"><span>${r.totalScore}</span> PTS</div>
-            ${r.playerId === socket.id ? `<div style="font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);letter-spacing:0.1em">YOU</div>` : ""}
+            ${r.playerId === socket.id ? `<div style="font-family:var(--mono);font-size:0.55rem;color:var(--text-muted);letter-spacing:0.12em">YOU</div>` : ""}
           `;
           podium.appendChild(card);
         });
@@ -2088,15 +1886,10 @@
         showScreen("gameover-screen");
       }
 
-      document.getElementById("play-again-btn").addEventListener("click", () => {
-        socket.emit("play_again");
-      });
+      document.getElementById("play-again-btn").addEventListener("click", () => socket.emit("play_again"));
+      document.getElementById("back-lobby-btn").addEventListener("click", () => location.reload());
 
-      document.getElementById("back-lobby-btn").addEventListener("click", () => {
-        location.reload();
-      });
-
-      // Randomize starting color on load
+      // Init
       updateMyColor(128, 128, 128);
     </script>
   </body>
