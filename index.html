@@ -33,7 +33,6 @@
         --radius: 12px;
         --radius-sm: 8px;
         --shadow: 0 8px 32px rgba(0,0,0,0.5);
-        --shadow-glow: 0 0 40px rgba(200,255,0,0.08);
       }
 
       *, *::before, *::after {
@@ -41,25 +40,15 @@
         box-sizing: border-box;
         -webkit-tap-highlight-color: transparent;
       }
-
-      html {
-        height: 100%;
-        touch-action: manipulation;
-        -webkit-text-size-adjust: 100%;
-      }
-
+      html { height: 100%; touch-action: manipulation; -webkit-text-size-adjust: 100%; }
       body {
-        height: 100%;
-        min-height: 100dvh;
-        background: var(--bg);
-        color: var(--text);
+        height: 100%; min-height: 100dvh;
+        background: var(--bg); color: var(--text);
         font-family: var(--body);
-        overflow-x: hidden;
-        user-select: none;
-        -webkit-user-select: none;
+        overflow-x: hidden; user-select: none; -webkit-user-select: none;
       }
 
-      /* Subtle grain */
+      /* grain */
       body::before {
         content: "";
         position: fixed; inset: 0;
@@ -69,1097 +58,416 @@
 
       /* ===== HEADER ===== */
       header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        display: flex; align-items: center; justify-content: space-between;
         padding: 14px 20px;
         border-bottom: 1px solid var(--border);
         background: var(--surface);
         position: sticky; top: 0; z-index: 50;
       }
-
-      .logo {
-        font-family: var(--display);
-        font-size: 1.7rem;
-        letter-spacing: 0.06em;
-        line-height: 1;
-      }
+      .logo { font-family: var(--display); font-size: 1.7rem; letter-spacing: 0.06em; line-height: 1; }
       .logo span { color: var(--accent); }
-
-      .header-right {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-
       .conn-badge {
-        font-family: var(--mono);
-        font-size: 0.58rem;
-        color: var(--text-dim);
-        border: 1px solid var(--border-bright);
-        padding: 4px 10px;
-        border-radius: 20px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        transition: all 0.3s;
+        font-family: var(--mono); font-size: 0.58rem; color: var(--text-dim);
+        border: 1px solid var(--border-bright); padding: 4px 10px; border-radius: 20px;
+        letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.3s;
       }
-      .conn-badge.connected {
-        color: var(--accent3);
-        border-color: var(--accent3);
-        background: var(--accent3-dim);
-      }
+      .conn-badge.connected { color: var(--accent3); border-color: var(--accent3); background: var(--accent3-dim); }
 
       /* ===== SCREENS ===== */
       .screen { display: none; }
       .screen.active {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        min-height: calc(100dvh - 57px);
-        padding: 28px 20px 40px;
+        display: flex; flex-direction: column; align-items: center;
+        min-height: calc(100dvh - 57px); padding: 28px 20px 40px;
       }
 
       /* ===== LOBBY ===== */
       #lobby-screen { gap: 32px; justify-content: center; }
-
       .hero-block { text-align: center; }
-
       .hero-title {
-        font-family: var(--display);
-        font-size: clamp(3.2rem, 16vw, 6rem);
-        line-height: 0.88;
-        letter-spacing: 0.02em;
+        font-family: var(--display); font-size: clamp(3.2rem, 16vw, 6rem);
+        line-height: 0.88; letter-spacing: 0.02em;
       }
       .hero-title em {
-        font-style: normal;
-        color: var(--accent);
-        position: relative;
-        display: inline-block;
+        font-style: normal; color: var(--accent);
+        position: relative; display: inline-block;
       }
       .hero-title em::after {
-        content: "";
-        position: absolute;
-        bottom: 2px; left: 0; right: 0;
-        height: 3px;
-        background: var(--accent);
-        opacity: 0.35;
-        border-radius: 2px;
+        content: ""; position: absolute; bottom: 2px; left: 0; right: 0;
+        height: 3px; background: var(--accent); opacity: 0.35; border-radius: 2px;
       }
-
       .hero-sub {
-        font-size: 0.72rem;
-        color: var(--text-dim);
-        letter-spacing: 0.22em;
-        text-transform: uppercase;
-        margin-top: 12px;
-        font-family: var(--mono);
+        font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.22em;
+        text-transform: uppercase; margin-top: 12px; font-family: var(--mono);
       }
-
       .lobby-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 24px 20px;
-        width: 100%;
-        max-width: 420px;
-        position: relative;
-        box-shadow: var(--shadow);
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: var(--radius); padding: 24px 20px; width: 100%; max-width: 420px;
+        position: relative; box-shadow: var(--shadow);
       }
       .lobby-card::before {
-        content: "";
-        position: absolute;
-        top: 0; left: 20px; right: 20px;
-        height: 1px;
+        content: ""; position: absolute; top: 0; left: 20px; right: 20px; height: 1px;
         background: linear-gradient(90deg, transparent, var(--accent), transparent);
       }
-
       .form-group { margin-bottom: 16px; }
-
       .form-label {
-        font-family: var(--mono);
-        font-size: 0.6rem;
-        color: var(--text-dim);
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        display: block;
-        margin-bottom: 7px;
+        font-family: var(--mono); font-size: 0.6rem; color: var(--text-dim);
+        letter-spacing: 0.18em; text-transform: uppercase; display: block; margin-bottom: 7px;
       }
-
       .form-input {
-        width: 100%;
-        background: var(--surface2);
-        border: 1px solid var(--border-bright);
-        border-radius: var(--radius-sm);
-        color: var(--text);
-        font-family: var(--mono);
-        font-size: 1rem; /* no iOS zoom */
-        padding: 13px 14px;
-        outline: none;
-        transition: border-color 0.2s, box-shadow 0.2s;
-        letter-spacing: 0.05em;
+        width: 100%; background: var(--surface2); border: 1px solid var(--border-bright);
+        border-radius: var(--radius-sm); color: var(--text); font-family: var(--mono);
+        font-size: 1rem; padding: 13px 14px; outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s; letter-spacing: 0.05em;
       }
-      .form-input:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px var(--accent-dim);
-      }
+      .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
       .form-input::placeholder { color: var(--text-muted); }
-
       .btn-primary {
-        width: 100%;
-        background: var(--accent);
-        color: #0a0a0f;
-        border: none;
-        border-radius: var(--radius-sm);
-        font-family: var(--display);
-        font-size: 1.25rem;
-        letter-spacing: 0.1em;
-        padding: 15px 24px;
-        min-height: 54px;
-        cursor: pointer;
-        transition: all 0.18s;
-        font-weight: 400;
-        position: relative;
-        overflow: hidden;
+        width: 100%; background: var(--accent); color: #0a0a0f; border: none;
+        border-radius: var(--radius-sm); font-family: var(--display); font-size: 1.25rem;
+        letter-spacing: 0.1em; padding: 15px 24px; min-height: 54px; cursor: pointer;
+        transition: all 0.18s; font-weight: 400; position: relative; overflow: hidden;
       }
       .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
       .btn-primary:hover { box-shadow: 0 4px 20px rgba(200,255,0,0.25); }
-
       .btn-secondary {
-        width: 100%;
-        background: var(--surface2);
-        color: var(--text);
-        border: 1px solid var(--border-bright);
-        border-radius: var(--radius-sm);
-        font-family: var(--display);
-        font-size: 1.1rem;
-        letter-spacing: 0.1em;
-        padding: 14px 24px;
-        min-height: 54px;
-        cursor: pointer;
-        transition: all 0.18s;
-        margin-top: 10px;
+        width: 100%; background: var(--surface2); color: var(--text);
+        border: 1px solid var(--border-bright); border-radius: var(--radius-sm);
+        font-family: var(--display); font-size: 1.1rem; letter-spacing: 0.1em;
+        padding: 14px 24px; min-height: 54px; cursor: pointer; transition: all 0.18s; margin-top: 10px;
       }
       .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
       .btn-secondary:active { transform: scale(0.97); }
-
-      .how-to {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        width: 100%;
-        max-width: 420px;
-      }
-
+      .how-to { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 420px; }
       .how-step {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 14px 16px;
-        background: var(--surface);
+        display: flex; align-items: center; gap: 16px;
+        border: 1px solid var(--border); border-radius: var(--radius-sm);
+        padding: 14px 16px; background: var(--surface);
       }
-      .step-num {
-        font-family: var(--display);
-        font-size: 2.2rem;
-        color: var(--accent);
-        opacity: 0.4;
-        line-height: 1;
-        min-width: 44px;
-      }
-      .step-text {
-        font-size: 0.75rem;
-        color: var(--text-dim);
-        line-height: 1.55;
-        font-weight: 400;
-      }
+      .step-num { font-family: var(--display); font-size: 2.2rem; color: var(--accent); opacity: 0.4; line-height: 1; min-width: 44px; }
+      .step-text { font-size: 0.75rem; color: var(--text-dim); line-height: 1.55; font-weight: 400; }
 
-      /* ===== WAITING SCREEN ===== */
+      /* ===== WAITING ===== */
       #waiting-screen { gap: 24px; justify-content: center; }
-
-      .room-code-label {
-        font-family: var(--mono);
-        font-size: 0.6rem;
-        color: var(--text-dim);
-        letter-spacing: 0.22em;
-        text-transform: uppercase;
-        text-align: center;
-      }
-
+      .room-code-label { font-family: var(--mono); font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.22em; text-transform: uppercase; text-align: center; }
       .room-code {
-        font-family: var(--display);
-        font-size: 3rem;
-        letter-spacing: 0.22em;
-        color: var(--accent);
-        text-align: center;
-        border: 1px solid var(--border-bright);
-        background: var(--surface);
-        border-radius: var(--radius);
-        padding: 18px 40px;
-        cursor: pointer;
-        transition: all 0.2s;
+        font-family: var(--display); font-size: 3rem; letter-spacing: 0.22em; color: var(--accent);
+        text-align: center; border: 1px solid var(--border-bright); background: var(--surface);
+        border-radius: var(--radius); padding: 18px 40px; cursor: pointer; transition: all 0.2s;
         box-shadow: 0 0 24px rgba(200,255,0,0.06);
       }
       .room-code:active { transform: scale(0.97); }
-
-      .copy-hint {
-        font-family: var(--mono);
-        font-size: 0.58rem;
-        color: var(--text-muted);
-        text-align: center;
-        letter-spacing: 0.12em;
-      }
-
-      .players-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        width: 100%;
-        max-width: 420px;
-      }
-
+      .copy-hint { font-family: var(--mono); font-size: 0.58rem; color: var(--text-muted); text-align: center; letter-spacing: 0.12em; }
+      .players-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 420px; }
       .player-slot {
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 20px 14px;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        min-height: 90px;
-        background: var(--surface);
-        transition: all 0.3s;
-        position: relative;
-        overflow: hidden;
+        border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 14px;
+        text-align: center; display: flex; flex-direction: column; align-items: center;
+        justify-content: center; gap: 8px; min-height: 90px; background: var(--surface);
+        transition: all 0.3s; position: relative; overflow: hidden;
       }
       .player-slot.filled { border-color: var(--accent); background: var(--surface2); }
       .player-slot.filled::before {
-        content: "";
-        position: absolute;
-        inset: 0;
+        content: ""; position: absolute; inset: 0;
         background: radial-gradient(circle at 50% 0%, rgba(200,255,0,0.06), transparent 70%);
       }
-
-      .player-slot-label {
-        font-family: var(--mono);
-        font-size: 0.58rem;
-        color: var(--text-muted);
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-      }
-      .player-slot-name {
-        font-family: var(--display);
-        font-size: 1.3rem;
-        letter-spacing: 0.05em;
-      }
-      .player-slot-empty {
-        font-size: 0.72rem;
-        color: var(--text-muted);
-        font-family: var(--mono);
-      }
-
-      .pulse-dot {
-        width: 7px; height: 7px;
-        background: var(--text-muted);
-        border-radius: 50%;
-        animation: pulse 1.5s ease-in-out infinite;
-      }
+      .player-slot-label { font-family: var(--mono); font-size: 0.58rem; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; }
+      .player-slot-name { font-family: var(--display); font-size: 1.3rem; letter-spacing: 0.05em; }
+      .player-slot-empty { font-size: 0.72rem; color: var(--text-muted); font-family: var(--mono); }
+      .pulse-dot { width: 7px; height: 7px; background: var(--text-muted); border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; }
       .player-slot.filled .pulse-dot { background: var(--accent3); animation: none; }
-
-      @keyframes pulse {
-        0%, 100% { opacity: 0.3; transform: scale(0.8); }
-        50% { opacity: 1; transform: scale(1.1); }
-      }
-
-      .waiting-msg {
-        font-family: var(--mono);
-        font-size: 0.72rem;
-        color: var(--text-dim);
-        letter-spacing: 0.1em;
-        text-align: center;
-      }
-
+      @keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
+      .waiting-msg { font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.1em; text-align: center; }
       .blink { animation: blink 1s step-end infinite; }
       @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
       /* ===== FULLSCREEN COLOR REVEAL ===== */
       #color-reveal {
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 500;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        display: none; position: fixed; inset: 0; z-index: 500;
+        flex-direction: column; align-items: center; justify-content: center;
         animation: revealIn 0.4s cubic-bezier(0.16,1,0.3,1);
       }
       #color-reveal.active { display: flex; }
-
-      @keyframes revealIn {
-        from { opacity: 0; transform: scale(1.06); }
-        to { opacity: 1; transform: scale(1); }
-      }
-
+      @keyframes revealIn { from { opacity: 0; transform: scale(1.06); } to { opacity: 1; transform: scale(1); } }
       .reveal-top-bar {
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        padding: 20px 24px 16px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        position: absolute; top: 0; left: 0; right: 0;
+        padding: 20px 24px 16px; display: flex; align-items: center; justify-content: space-between;
       }
+      .reveal-label { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(255,255,255,0.6); font-weight: 700; }
+      .reveal-timer-ring { position: relative; width: 52px; height: 52px; }
+      .reveal-timer-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+      .reveal-timer-ring .ring-bg { fill: none; stroke: rgba(255,255,255,0.15); stroke-width: 3; }
+      .reveal-timer-ring .ring-fill { fill: none; stroke: rgba(255,255,255,0.9); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 138; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear; }
+      .reveal-timer-num { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--display); font-size: 1.2rem; color: rgba(255,255,255,0.9); line-height: 1; }
+      .reveal-center { display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; padding: 20px; }
+      .reveal-memorize-text { font-family: var(--display); font-size: clamp(2rem, 9vw, 3.5rem); letter-spacing: 0.08em; color: rgba(255,255,255,0.9); text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+      .reveal-hex { display: none; font-family: var(--mono); font-size: clamp(1.6rem, 7vw, 2.5rem); letter-spacing: 0.2em; color: rgba(255,255,255,0.85); background: rgba(0,0,0,0.2); padding: 10px 24px; border-radius: 8px; backdrop-filter: blur(4px); }
+      .reveal-rgb { font-family: var(--mono); font-size: 0.85rem; color: rgba(255,255,255,0.55); letter-spacing: 0.12em; display: none; gap: 16px; }
+      .reveal-hint { font-family: var(--mono); font-size: 0.65rem; color: rgba(255,255,255,0.4); letter-spacing: 0.18em; text-transform: uppercase; margin-top: 8px; animation: pulse 2s ease-in-out infinite; }
+      .reveal-bottom-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.15); overflow: hidden; }
+      .reveal-progress-bar { height: 100%; background: rgba(255,255,255,0.85); width: 100%; transform-origin: left; transition: transform 1s linear; }
 
-      .reveal-label {
-        font-family: var(--mono);
-        font-size: 0.65rem;
-        letter-spacing: 0.22em;
-        text-transform: uppercase;
-        color: rgba(255,255,255,0.6);
-        font-weight: 700;
-      }
-
-      .reveal-timer-ring {
-        position: relative;
-        width: 52px; height: 52px;
-      }
-      .reveal-timer-ring svg {
-        position: absolute;
-        inset: 0;
-        transform: rotate(-90deg);
-      }
-      .reveal-timer-ring .ring-bg {
-        fill: none;
-        stroke: rgba(255,255,255,0.15);
-        stroke-width: 3;
-      }
-      .reveal-timer-ring .ring-fill {
-        fill: none;
-        stroke: rgba(255,255,255,0.9);
-        stroke-width: 3;
-        stroke-linecap: round;
-        stroke-dasharray: 138;
-        stroke-dashoffset: 0;
-        transition: stroke-dashoffset 1s linear;
-      }
-      .reveal-timer-num {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--display);
-        font-size: 1.2rem;
-        color: rgba(255,255,255,0.9);
-        line-height: 1;
-      }
-
-      .reveal-center {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 24px;
-        text-align: center;
-        padding: 20px;
-      }
-
-      .reveal-memorize-text {
-        font-family: var(--display);
-        font-size: clamp(2rem, 9vw, 3.5rem);
-        letter-spacing: 0.08em;
-        color: rgba(255,255,255,0.9);
-        text-shadow: 0 2px 20px rgba(0,0,0,0.3);
-      }
-
-      .reveal-hex {
-        display: none;
-        font-family: var(--mono);
-        font-size: clamp(1.6rem, 7vw, 2.5rem);
-        letter-spacing: 0.2em;
-        color: rgba(255,255,255,0.85);
-        background: rgba(0,0,0,0.2);
-        padding: 10px 24px;
-        border-radius: 8px;
-        backdrop-filter: blur(4px);
-      }
-
-      .reveal-rgb {
-        font-family: var(--mono);
-        font-size: 0.85rem;
-        color: rgba(255,255,255,0.55);
-        letter-spacing: 0.12em;
-        display: none;
-        gap: 16px;
-      }
-
-      .reveal-hint {
-        font-family: var(--mono);
-        font-size: 0.65rem;
-        color: rgba(255,255,255,0.4);
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        margin-top: 8px;
-        animation: pulse 2s ease-in-out infinite;
-      }
-
-      .reveal-bottom-bar {
-        position: absolute;
-        bottom: 0; left: 0; right: 0;
-        height: 4px;
-        background: rgba(255,255,255,0.15);
-        overflow: hidden;
-      }
-      .reveal-progress-bar {
-        height: 100%;
-        background: rgba(255,255,255,0.85);
-        width: 100%;
-        transform-origin: left;
-        transition: transform 1s linear;
-      }
-
-      /* ===== GAME SCREEN ===== */
+      /* ===== GAME SCREEN — FULLSCREEN PICKER ===== */
       #game-screen { padding: 0; display: none; }
       #game-screen.active { display: block; padding: 0; min-height: unset; }
 
       .game-layout {
-        display: flex;
-        flex-direction: column;
+        display: flex; flex-direction: column;
         height: calc(100dvh - 57px);
+        position: relative;
       }
 
-      /* Top bar */
+      /* The color preview fills all remaining space */
+      .color-canvas {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        transition: background-color 0.08s ease;
+        min-height: 0;
+      }
+
+      /* Overlay info on top of the color canvas */
+      .canvas-overlay {
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        pointer-events: none;
+      }
+
+      /* Top score + round bar */
       .game-topbar {
-        display: grid;
-        grid-template-columns: 1fr auto 1fr;
-        align-items: center;
-        padding: 12px 16px;
-        border-bottom: 1px solid var(--border);
-        background: var(--surface);
-        gap: 12px;
-        flex-shrink: 0;
+        display: grid; grid-template-columns: 1fr auto 1fr;
+        align-items: center; padding: 14px 18px;
+        background: rgba(0,0,0,0.45);
+        backdrop-filter: blur(12px) saturate(0.7);
+        -webkit-backdrop-filter: blur(12px) saturate(0.7);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        gap: 12px; flex-shrink: 0;
       }
-
       .score-block { display: flex; flex-direction: column; gap: 2px; }
       .score-block.right { text-align: right; align-items: flex-end; }
-
-      .score-name {
-        font-family: var(--mono);
-        font-size: 0.55rem;
-        color: var(--text-dim);
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-      }
-      .score-pts {
-        font-family: var(--display);
-        font-size: 1.8rem;
-        line-height: 1;
-        letter-spacing: 0.05em;
-        transition: color 0.3s;
-      }
+      .score-name { font-family: var(--mono); font-size: 0.5rem; color: rgba(255,255,255,0.45); letter-spacing: 0.16em; text-transform: uppercase; }
+      .score-pts { font-family: var(--display); font-size: 2rem; line-height: 1; letter-spacing: 0.05em; color: rgba(255,255,255,0.9); transition: color 0.3s; }
       .score-pts.you { color: var(--accent); }
-
       .round-info { text-align: center; }
-      .round-label {
-        font-family: var(--mono);
-        font-size: 0.52rem;
-        color: var(--text-muted);
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        margin-bottom: 2px;
-      }
-      .round-num {
-        font-family: var(--display);
-        font-size: 1.25rem;
-        letter-spacing: 0.08em;
-      }
+      .round-label { font-family: var(--mono); font-size: 0.48rem; color: rgba(255,255,255,0.35); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 1px; }
+      .round-num { font-family: var(--display); font-size: 1.2rem; letter-spacing: 0.08em; color: rgba(255,255,255,0.8); }
 
-      /* Game main content - flex column, fills remaining space */
-      .game-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-      }
-
-      /* Target panel - compact info strip after reveal */
+      /* Target strip — semi-transparent pill on canvas */
       .target-strip {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 16px;
-        border-bottom: 1px solid var(--border);
-        background: var(--surface2);
-        flex-shrink: 0;
-      }
-
-      .target-strip-swatch {
-        width: 38px;
-        height: 38px;
-        border-radius: var(--radius-sm);
+        display: flex; align-items: center; gap: 10px;
+        margin: 12px 14px 0;
+        padding: 10px 14px;
+        background: rgba(0,0,0,0.35);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 40px;
         border: 1px solid rgba(255,255,255,0.1);
-        flex-shrink: 0;
+        pointer-events: none;
+      }
+      .target-strip-swatch {
+        width: 30px; height: 30px; border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.2); flex-shrink: 0;
         transition: background 0.3s, opacity 0.5s;
       }
-
       .target-strip-info { flex: 1; min-width: 0; }
-
-      .target-strip-label {
-        font-family: var(--mono);
-        font-size: 0.55rem;
-        color: var(--text-dim);
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        display: block;
-        margin-bottom: 2px;
-      }
-
-      .target-strip-hex {
-        display: none;
-        font-family: var(--mono);
-        font-size: 0.95rem;
-        letter-spacing: 0.1em;
-        transition: opacity 0.5s;
-      }
-
+      .target-strip-label { font-family: var(--mono); font-size: 0.5rem; color: rgba(255,255,255,0.4); letter-spacing: 0.18em; text-transform: uppercase; display: block; margin-bottom: 1px; }
+      .target-strip-hex { font-family: var(--mono); font-size: 0.82rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.85); transition: opacity 0.5s; }
       .target-strip-state {
-        font-family: var(--mono);
-        font-size: 0.58rem;
-        letter-spacing: 0.1em;
-        padding: 5px 10px;
-        border-radius: 20px;
-        flex-shrink: 0;
+        font-family: var(--mono); font-size: 0.52rem; letter-spacing: 0.1em;
+        padding: 4px 10px; border-radius: 20px; flex-shrink: 0;
       }
-      .target-strip-state.memorizing {
-        color: var(--accent);
-        background: var(--accent-dim);
-        border: 1px solid rgba(200,255,0,0.2);
-      }
-      .target-strip-state.hidden {
-        color: var(--text-dim);
-        background: var(--surface3);
-        border: 1px solid var(--border-bright);
-      }
+      .target-strip-state.memorizing { color: var(--accent); background: rgba(200,255,0,0.15); border: 1px solid rgba(200,255,0,0.25); }
+      .target-strip-state.hidden { color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); }
 
-      /* Picker area — fills remaining space */
-      .picker-area {
+      /* Center hex display on canvas */
+      .canvas-center {
         flex: 1;
-        display: flex;
-        flex-direction: column;
-        padding: 16px;
-        gap: 14px;
-        overflow-y: auto;
+        display: flex; align-items: center; justify-content: center;
+        flex-direction: column; gap: 8px;
+      }
+      .canvas-hex {
+        font-family: var(--mono); font-size: clamp(1.3rem, 6vw, 2rem);
+        letter-spacing: 0.15em; color: rgba(255,255,255,0.9);
+        background: rgba(0,0,0,0.3); backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        padding: 8px 20px; border-radius: 40px;
+        border: 1px solid rgba(255,255,255,0.12);
+        transition: color 0.1s;
+        pointer-events: none;
+      }
+      .canvas-rgb {
+        font-family: var(--mono); font-size: 0.62rem;
+        color: rgba(255,255,255,0.45); letter-spacing: 0.12em;
+        pointer-events: none;
       }
 
-      /* Color preview row */
-      .color-preview-row {
-        display: flex;
-        gap: 12px;
-        align-items: stretch;
-      }
-
-      .your-swatch-wrap {
-        position: relative;
-        flex: 1;
-        border-radius: var(--radius);
-        overflow: hidden;
-        border: 2px solid rgba(255,255,255,0.08);
-        min-height: 100px;
-      }
-
-      .your-swatch {
-        width: 100%;
-        height: 100%;
-        min-height: 100px;
-        transition: background 0.1s;
-      }
-
+      /* Submitted overlay on canvas */
       .submitted-overlay {
         position: absolute; inset: 0;
         background: rgba(0,0,0,0.55);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        gap: 6px;
-        font-family: var(--display);
-        font-size: 1.4rem;
-        letter-spacing: 0.08em;
-        color: var(--accent3);
-        opacity: 0;
-        transition: opacity 0.3s;
-        backdrop-filter: blur(2px);
+        display: flex; align-items: center; justify-content: center;
+        flex-direction: column; gap: 8px;
+        font-family: var(--display); font-size: 2.5rem; letter-spacing: 0.1em;
+        color: var(--accent3); opacity: 0; transition: opacity 0.35s;
+        backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
       }
       .submitted-overlay.visible { opacity: 1; }
+      .submitted-overlay span:last-child { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.2em; }
 
-      .your-hex-label {
+      /* ===== PICKER PANEL — bottom sheet ===== */
+      .picker-panel {
+        flex-shrink: 0;
+        background: rgba(10,10,15,0.92);
+        backdrop-filter: blur(20px) saturate(1.2);
+        -webkit-backdrop-filter: blur(20px) saturate(1.2);
+        border-top: 1px solid rgba(255,255,255,0.07);
+        padding: 18px 18px 20px;
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        gap: 4px;
-        min-width: 0;
-      }
-      .your-label-text {
-        font-family: var(--mono);
-        font-size: 0.55rem;
-        color: var(--text-dim);
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-      }
-      .your-hex-val {
-        font-family: var(--mono);
-        font-size: 0.88rem;
-        letter-spacing: 0.06em;
-        color: var(--text);
+        gap: 14px;
       }
 
       /* Sliders */
-      .sliders-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 16px 14px;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      }
+      .sliders-wrap { display: flex; flex-direction: column; gap: 10px; }
 
       .slider-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        display: flex; align-items: center; gap: 12px;
       }
-
-      .slider-channel-label {
-        font-family: var(--mono);
-        font-size: 0.8rem;
-        font-weight: 700;
-        width: 14px;
-        flex-shrink: 0;
-        text-align: center;
+      .slider-label {
+        font-family: var(--mono); font-size: 0.62rem; font-weight: 700;
+        width: 28px; flex-shrink: 0; letter-spacing: 0.1em; text-align: left;
       }
-
       .slider-track-wrap {
-        flex: 1;
-        position: relative;
-        height: 28px;
-        display: flex;
-        align-items: center;
+        flex: 1; position: relative; height: 36px; display: flex; align-items: center;
       }
 
+      /* Custom range slider */
       .color-slider {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 100%;
-        height: 8px;
-        border-radius: 4px;
-        outline: none;
-        cursor: pointer;
-        touch-action: pan-x;
-        position: relative;
-        z-index: 1;
+        -webkit-appearance: none; appearance: none;
+        width: 100%; height: 10px; border-radius: 5px;
+        outline: none; cursor: pointer; touch-action: pan-x;
+        position: relative; z-index: 1;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
       }
       .color-slider::-webkit-slider-thumb {
         -webkit-appearance: none;
-        width: 26px;
-        height: 26px;
+        width: 28px; height: 28px;
         background: white;
-        border-radius: 50%;
-        cursor: pointer;
-        border: 3px solid rgba(0,0,0,0.25);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        border-radius: 50%; cursor: pointer;
+        border: 3px solid rgba(0,0,0,0.2);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.15);
         transition: transform 0.1s;
       }
-      .color-slider:active::-webkit-slider-thumb { transform: scale(1.12); }
+      .color-slider:active::-webkit-slider-thumb { transform: scale(1.15); }
       .color-slider::-moz-range-thumb {
-        width: 26px; height: 26px;
-        background: white;
-        border-radius: 50%;
-        cursor: pointer;
-        border: 3px solid rgba(0,0,0,0.25);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        width: 28px; height: 28px; background: white;
+        border-radius: 50%; cursor: pointer; border: 3px solid rgba(0,0,0,0.2);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.5);
       }
 
-      #r-slider { background: linear-gradient(to right, #1a0000, #ff0000); }
-      #g-slider { background: linear-gradient(to right, #001a00, #00ff00); }
-      #b-slider { background: linear-gradient(to right, #00001a, #0066ff); }
+      /* RGB slider gradients — updated dynamically */
+      #r-slider { background: linear-gradient(to right, rgb(0, var(--cg), var(--cb)), rgb(255, var(--cg), var(--cb))); }
+      #g-slider { background: linear-gradient(to right, rgb(var(--cr), 0, var(--cb)), rgb(var(--cr), 255, var(--cb))); }
+      #b-slider { background: linear-gradient(to right, rgb(var(--cr), var(--cg), 0), rgb(var(--cr), var(--cg), 255)); }
 
       .slider-val {
-        font-family: var(--mono);
-        font-size: 0.75rem;
-        color: var(--text-dim);
-        width: 34px;
-        text-align: right;
-        flex-shrink: 0;
+        font-family: var(--mono); font-size: 0.68rem; color: rgba(255,255,255,0.45);
+        width: 30px; text-align: right; flex-shrink: 0;
       }
 
-      /* Hex input row */
-      .hex-row {
-        display: flex;
-        gap: 10px;
-        align-items: center;
+      /* Saturation slider: white → current hue full sat */
+      #sat-slider { background: linear-gradient(to right, hsl(0,0%,50%), var(--sat-end, #888)); }
+      /* Brightness slider: black → full brightness of current hue+sat */
+      #bri-slider { background: linear-gradient(to right, #000, var(--bri-end, #fff)); }
+
+      /* Divider */
+      .slider-divider {
+        height: 1px; background: rgba(255,255,255,0.06); margin: 2px 0;
       }
 
-      .hex-input-wrap {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        background: var(--surface2);
-        border: 1px solid var(--border-bright);
-        border-radius: var(--radius-sm);
-        padding: 10px 12px;
-        transition: border-color 0.2s, box-shadow 0.2s;
-      }
-      .hex-input-wrap:focus-within {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px var(--accent-dim);
-      }
-      .hex-prefix {
-        font-family: var(--mono);
-        font-size: 0.9rem;
-        color: var(--text-muted);
-      }
-      .hex-input {
-        flex: 1;
-        background: transparent;
-        border: none;
-        color: var(--text);
-        font-family: var(--mono);
-        font-size: 1rem;
-        outline: none;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        min-width: 0;
-      }
-      .hex-input::placeholder { color: var(--text-muted); }
-
-      /* Native color picker button */
-      .btn-eyedrop {
-        background: var(--surface2);
-        border: 1px solid var(--border-bright);
-        border-radius: var(--radius-sm);
-        padding: 10px 14px;
-        cursor: pointer;
-        font-size: 1.1rem;
-        transition: all 0.15s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 46px;
-        min-height: 46px;
-        position: relative;
-        overflow: hidden;
-      }
-      .btn-eyedrop:active { transform: scale(0.95); }
-      #color-picker-native {
-        position: absolute; inset: 0;
-        opacity: 0;
-        cursor: pointer;
-        width: 100%; height: 100%;
-      }
-
-      /* Bottom action bar */
+      /* Bottom bar: status + submit */
       .game-bottombar {
-        flex-shrink: 0;
-        padding: 12px 16px;
-        border-top: 1px solid var(--border);
-        background: var(--surface);
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        display: flex; align-items: center; gap: 12px;
+        padding-top: 4px;
       }
-
-      .status-pills {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-      }
+      .status-pills { flex: 1; display: flex; flex-direction: column; gap: 5px; }
       .status-pill {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        font-family: var(--mono);
-        font-size: 0.58rem;
-        letter-spacing: 0.08em;
-        color: var(--text-muted);
+        display: flex; align-items: center; gap: 7px;
+        font-family: var(--mono); font-size: 0.55rem;
+        letter-spacing: 0.08em; color: rgba(255,255,255,0.3);
       }
-      .status-dot {
-        width: 6px; height: 6px;
-        border-radius: 50%;
-        background: var(--text-muted);
-        flex-shrink: 0;
-      }
-      .status-dot.submitted { background: var(--accent3); box-shadow: 0 0 6px var(--accent3); }
-      .status-dot.pulsing { animation: pulse 1.5s ease-in-out infinite; }
+      .status-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.2); flex-shrink: 0; }
+      .status-dot.submitted { background: var(--accent3); box-shadow: 0 0 8px var(--accent3); }
+      .status-dot.pulsing { animation: pulse 1.5s ease-in-out infinite; background: rgba(255,255,255,0.4); }
 
       .btn-submit {
-        background: var(--accent);
-        color: #0a0a0f;
-        border: none;
-        border-radius: var(--radius-sm);
-        font-family: var(--display);
-        font-size: 1.15rem;
-        letter-spacing: 0.1em;
-        padding: 14px 22px;
-        min-height: 54px;
-        min-width: 140px;
-        cursor: pointer;
-        transition: all 0.18s;
-        white-space: nowrap;
-        flex-shrink: 0;
+        background: var(--accent); color: #0a0a0f; border: none;
+        border-radius: 40px; font-family: var(--display); font-size: 1.1rem;
+        letter-spacing: 0.12em; padding: 13px 24px;
+        min-height: 50px; min-width: 130px;
+        cursor: pointer; transition: all 0.18s; white-space: nowrap; flex-shrink: 0;
+        box-shadow: 0 4px 20px rgba(200,255,0,0.2);
       }
-      .btn-submit:not(:disabled):active { transform: scale(0.96); }
-      .btn-submit:not(:disabled):hover { box-shadow: 0 4px 20px rgba(200,255,0,0.3); }
+      .btn-submit:not(:disabled):active { transform: scale(0.95); }
+      .btn-submit:not(:disabled):hover { box-shadow: 0 4px 28px rgba(200,255,0,0.4); }
       .btn-submit:disabled {
-        opacity: 0.35;
-        cursor: not-allowed;
-        background: var(--border-bright);
-        color: var(--text-dim);
-        box-shadow: none;
+        opacity: 0.3; cursor: not-allowed; background: rgba(255,255,255,0.15);
+        color: rgba(255,255,255,0.4); box-shadow: none;
       }
 
       /* ===== RESULT OVERLAY ===== */
       #result-overlay {
-        display: none;
-        position: fixed; inset: 0;
-        background: rgba(10,10,15,0.97);
-        z-index: 300;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        gap: 20px;
-        padding: 36px 20px 40px;
-        overflow-y: auto;
+        display: none; position: fixed; inset: 0;
+        background: rgba(10,10,15,0.97); z-index: 300;
+        flex-direction: column; align-items: center; justify-content: flex-start;
+        gap: 20px; padding: 36px 20px 40px; overflow-y: auto;
       }
-      #result-overlay.visible {
-        display: flex;
-        animation: fadeUp 0.35s cubic-bezier(0.16,1,0.3,1);
-      }
-      @keyframes fadeUp {
-        from { opacity: 0; transform: translateY(14px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-
-      .result-label {
-        font-family: var(--mono);
-        font-size: 0.6rem;
-        color: var(--text-muted);
-        letter-spacing: 0.22em;
-        text-transform: uppercase;
-        text-align: center;
-      }
-      .result-title {
-        font-family: var(--display);
-        font-size: clamp(2.2rem, 10vw, 4rem);
-        letter-spacing: 0.05em;
-        text-align: center;
-        line-height: 1;
-      }
-
-      .result-swatches {
-        display: flex;
-        gap: 16px;
-        align-items: flex-end;
-        justify-content: center;
-        flex-wrap: wrap;
-      }
-      .result-color-block {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-      }
-      .result-color-block .label {
-        font-family: var(--mono);
-        font-size: 0.58rem;
-        color: var(--text-muted);
-        letter-spacing: 0.15em;
-        text-transform: uppercase;
-      }
-      .result-swatch {
-        border-radius: var(--radius-sm);
-        border: 2px solid rgba(255,255,255,0.1);
-        flex-shrink: 0;
-      }
+      #result-overlay.visible { display: flex; animation: fadeUp 0.35s cubic-bezier(0.16,1,0.3,1); }
+      @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+      .result-label { font-family: var(--mono); font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.22em; text-transform: uppercase; text-align: center; }
+      .result-title { font-family: var(--display); font-size: clamp(2.2rem, 10vw, 4rem); letter-spacing: 0.05em; text-align: center; line-height: 1; }
+      .result-swatches { display: flex; gap: 16px; align-items: flex-end; justify-content: center; flex-wrap: wrap; }
+      .result-color-block { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+      .result-color-block .label { font-family: var(--mono); font-size: 0.58rem; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; }
+      .result-swatch { border-radius: var(--radius-sm); border: 2px solid rgba(255,255,255,0.1); flex-shrink: 0; }
       .result-swatch.target { width: 72px; height: 72px; }
       .result-swatch.player { width: 56px; height: 56px; }
-
-      .result-cards {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        width: 100%;
-        max-width: 500px;
-      }
-      .result-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 16px;
-        position: relative;
-        overflow: hidden;
-      }
+      .result-cards { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 500px; }
+      .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; position: relative; overflow: hidden; }
       .result-card.winner-card { border-color: var(--accent); }
-      .result-card.winner-card::before {
-        content: "WINNER";
-        position: absolute; top: -1px; right: 14px;
-        background: var(--accent); color: #0a0a0f;
-        font-family: var(--mono); font-size: 0.5rem;
-        font-weight: 700; letter-spacing: 0.18em;
-        padding: 2px 8px;
-        border-radius: 0 0 6px 6px;
-      }
-      .result-card-name {
-        font-family: var(--display);
-        font-size: 1.3rem;
-        letter-spacing: 0.05em;
-        margin-bottom: 10px;
-      }
-      .result-stat {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 7px;
-      }
-      .result-stat-label {
-        font-family: var(--mono);
-        font-size: 0.58rem;
-        color: var(--text-muted);
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-      }
-      .result-stat-val {
-        font-family: var(--mono);
-        font-size: 0.82rem;
-        color: var(--text);
-      }
+      .result-card.winner-card::before { content: "WINNER"; position: absolute; top: -1px; right: 14px; background: var(--accent); color: #0a0a0f; font-family: var(--mono); font-size: 0.5rem; font-weight: 700; letter-spacing: 0.18em; padding: 2px 8px; border-radius: 0 0 6px 6px; }
+      .result-card-name { font-family: var(--display); font-size: 1.3rem; letter-spacing: 0.05em; margin-bottom: 10px; }
+      .result-stat { display: flex; justify-content: space-between; align-items: center; margin-top: 7px; }
+      .result-stat-label { font-family: var(--mono); font-size: 0.58rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; }
+      .result-stat-val { font-family: var(--mono); font-size: 0.82rem; color: var(--text); }
       .result-stat-val.highlight { color: var(--accent); font-weight: 700; }
-
-      .accuracy-bar-wrap {
-        width: 100%;
-        height: 4px;
-        background: var(--border);
-        border-radius: 2px;
-        margin-top: 6px;
-        overflow: hidden;
-      }
-      .accuracy-bar-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--accent3), var(--accent));
-        border-radius: 2px;
-        transition: width 0.6s cubic-bezier(0.16,1,0.3,1);
-      }
-
-      .result-countdown {
-        font-family: var(--mono);
-        font-size: 0.68rem;
-        color: var(--text-muted);
-        letter-spacing: 0.12em;
-        text-align: center;
-        margin-top: 4px;
-      }
+      .accuracy-bar-wrap { width: 100%; height: 4px; background: var(--border); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+      .accuracy-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent3), var(--accent)); border-radius: 2px; transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
+      .result-countdown { font-family: var(--mono); font-size: 0.68rem; color: var(--text-muted); letter-spacing: 0.12em; text-align: center; margin-top: 4px; }
 
       /* ===== GAME OVER ===== */
       #gameover-screen { gap: 32px; justify-content: center; }
-
-      .gameover-title {
-        font-family: var(--display);
-        font-size: clamp(3.5rem, 14vw, 6rem);
-        letter-spacing: 0.05em;
-        text-align: center;
-        line-height: 0.9;
-      }
-
-      .final-podium {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        width: 100%;
-        max-width: 420px;
-      }
-      .podium-card {
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 24px 16px;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-        background: var(--surface);
-      }
-      .podium-card.first {
-        border-color: var(--accent);
-        background: var(--surface2);
-        box-shadow: 0 0 30px rgba(200,255,0,0.06);
-      }
-      .podium-rank {
-        font-family: var(--display);
-        font-size: 2.8rem;
-        color: var(--text-muted);
-        line-height: 1;
-      }
+      .gameover-title { font-family: var(--display); font-size: clamp(3.5rem, 14vw, 6rem); letter-spacing: 0.05em; text-align: center; line-height: 0.9; }
+      .final-podium { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 420px; }
+      .podium-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 16px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--surface); }
+      .podium-card.first { border-color: var(--accent); background: var(--surface2); box-shadow: 0 0 30px rgba(200,255,0,0.06); }
+      .podium-rank { font-family: var(--display); font-size: 2.8rem; color: var(--text-muted); line-height: 1; }
       .podium-card.first .podium-rank { color: var(--accent); }
-      .podium-name {
-        font-family: var(--display);
-        font-size: 1.4rem;
-        letter-spacing: 0.04em;
-      }
-      .podium-score {
-        font-family: var(--mono);
-        font-size: 0.72rem;
-        color: var(--text-dim);
-        letter-spacing: 0.1em;
-      }
+      .podium-name { font-family: var(--display); font-size: 1.4rem; letter-spacing: 0.04em; }
+      .podium-score { font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.1em; }
       .podium-score span { color: var(--text); font-size: 0.9rem; }
-
-      .gameover-btns {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        width: 100%;
-        max-width: 360px;
-      }
+      .gameover-btns { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 360px; }
 
       /* ===== TOAST ===== */
       .toast {
-        position: fixed;
-        bottom: 24px;
-        left: 16px; right: 16px;
-        transform: translateY(20px);
-        background: var(--surface2);
-        border: 1px solid var(--border-bright);
-        border-radius: var(--radius-sm);
-        color: var(--text);
-        font-family: var(--mono);
-        font-size: 0.72rem;
-        letter-spacing: 0.08em;
-        padding: 12px 18px;
-        opacity: 0;
-        transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
-        z-index: 600;
-        text-align: center;
-        box-shadow: var(--shadow);
+        position: fixed; bottom: 24px; left: 16px; right: 16px;
+        transform: translateY(20px); background: rgba(30,30,46,0.95);
+        border: 1px solid var(--border-bright); border-radius: var(--radius-sm);
+        color: var(--text); font-family: var(--mono); font-size: 0.72rem;
+        letter-spacing: 0.08em; padding: 12px 18px; opacity: 0;
+        transition: all 0.3s cubic-bezier(0.16,1,0.3,1); z-index: 600;
+        text-align: center; box-shadow: var(--shadow);
+        backdrop-filter: blur(12px);
       }
       .toast.show { opacity: 1; transform: translateY(0); }
-
-      /* ===== COLOR PICKER NATIVE HIDDEN ===== */
-      #color-picker-native-standalone {
-        position: absolute; opacity: 0;
-        pointer-events: none; width: 1px; height: 1px;
-      }
-
-      /* ===== CONNECTING STATE ===== */
-      .connecting {
-        font-family: var(--mono);
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        letter-spacing: 0.1em;
-        text-align: center;
-        padding: 20px;
-      }
     </style>
   </head>
   <body>
@@ -1187,7 +495,6 @@
           <div class="reveal-timer-num" id="reveal-timer-num">10</div>
         </div>
       </div>
-
       <div class="reveal-center">
         <div class="reveal-memorize-text">MEMORIZE THIS COLOR</div>
         <div class="reveal-hex" id="reveal-hex">#FF6A3D</div>
@@ -1198,7 +505,6 @@
         </div>
         <div class="reveal-hint">IT WILL DISAPPEAR IN A MOMENT</div>
       </div>
-
       <div class="reveal-bottom-bar">
         <div class="reveal-progress-bar" id="reveal-progress"></div>
       </div>
@@ -1206,12 +512,10 @@
 
     <!-- ============ LOBBY SCREEN ============ -->
     <div class="screen active" id="lobby-screen">
-
       <div class="hero-block">
         <div class="hero-title">PICK THE<br/><em>EXACT</em><br/>COLOR</div>
         <div class="hero-sub">2-player real-time color accuracy battle</div>
       </div>
-
       <div class="lobby-card">
         <div class="form-group">
           <label class="form-label" for="player-name">Your Callsign</label>
@@ -1224,7 +528,6 @@
         <button class="btn-primary" id="join-btn">JOIN ROOM</button>
         <button class="btn-secondary" id="create-btn">CREATE NEW ROOM</button>
       </div>
-
       <div class="how-to">
         <div class="how-step">
           <div class="step-num">01</div>
@@ -1239,7 +542,6 @@
           <div class="step-text">Submit first for a speed bonus. Best memory wins the round!</div>
         </div>
       </div>
-
     </div>
 
     <!-- ============ WAITING SCREEN ============ -->
@@ -1247,7 +549,6 @@
       <div class="room-code-label">ROOM CODE</div>
       <div class="room-code" id="display-room-code" title="Tap to copy">----</div>
       <div class="copy-hint">TAP TO COPY</div>
-
       <div class="players-grid">
         <div class="player-slot" id="p1-slot">
           <div class="player-slot-label">Player 1</div>
@@ -1260,118 +561,118 @@
           <div class="player-slot-empty">Waiting...</div>
         </div>
       </div>
-
-      <div class="waiting-msg" id="waiting-msg">
-        SHARE THE CODE WITH YOUR OPPONENT<span class="blink">_</span>
-      </div>
+      <div class="waiting-msg" id="waiting-msg">SHARE THE CODE WITH YOUR OPPONENT<span class="blink">_</span></div>
     </div>
 
     <!-- ============ GAME SCREEN ============ -->
     <div class="screen" id="game-screen">
       <div class="game-layout">
 
-        <!-- Scorebar -->
-        <div class="game-topbar">
-          <div class="score-block">
-            <div class="score-name" id="my-score-name">YOU</div>
-            <div class="score-pts you" id="my-score">0</div>
+        <!-- Color canvas: fills remaining space -->
+        <div class="color-canvas" id="color-canvas">
+          <div class="canvas-overlay">
+            <!-- Top scorebar inside overlay -->
+            <div class="game-topbar">
+              <div class="score-block">
+                <div class="score-name" id="my-score-name">YOU</div>
+                <div class="score-pts you" id="my-score">0</div>
+              </div>
+              <div class="round-info">
+                <div class="round-label">ROUND</div>
+                <div class="round-num" id="round-display">1 / 5</div>
+              </div>
+              <div class="score-block right">
+                <div class="score-name" id="opp-score-name">OPP</div>
+                <div class="score-pts" id="opp-score">0</div>
+              </div>
+            </div>
+
+            <!-- Target pill -->
+            <div class="target-strip">
+              <div class="target-strip-swatch" id="target-swatch"></div>
+              <div class="target-strip-info">
+                <span class="target-strip-label">TARGET COLOR</span>
+                <div class="target-strip-hex" id="target-hex">#------</div>
+              </div>
+              <div class="target-strip-state memorizing" id="target-strip-state">MEMORIZE</div>
+            </div>
+
+            <!-- Center: live hex -->
+            <div class="canvas-center">
+              <div class="canvas-hex" id="canvas-hex">#808080</div>
+              <div class="canvas-rgb" id="canvas-rgb">R 128 · G 128 · B 128</div>
+            </div>
           </div>
-          <div class="round-info">
-            <div class="round-label">ROUND</div>
-            <div class="round-num" id="round-display">1 / 5</div>
-          </div>
-          <div class="score-block right">
-            <div class="score-name" id="opp-score-name">OPP</div>
-            <div class="score-pts" id="opp-score">0</div>
+
+          <!-- Submitted overlay -->
+          <div class="submitted-overlay" id="submitted-overlay">
+            <span>✓</span>
+            <span>LOCKED IN</span>
           </div>
         </div>
 
-        <!-- Main content -->
-        <div class="game-content">
-
-          <!-- Target strip -->
-          <div class="target-strip">
-            <div class="target-strip-swatch" id="target-swatch"></div>
-            <div class="target-strip-info">
-              <span class="target-strip-label">TARGET COLOR</span>
-              <div class="target-strip-hex" id="target-hex">#------</div>
+        <!-- Picker panel — bottom sheet -->
+        <div class="picker-panel">
+          <div class="sliders-wrap">
+            <!-- R slider -->
+            <div class="slider-row">
+              <span class="slider-label" style="color:#ff6b6b">R</span>
+              <div class="slider-track-wrap">
+                <input type="range" class="color-slider" id="r-slider" min="0" max="255" value="128" />
+              </div>
+              <span class="slider-val" id="r-val">128</span>
             </div>
-            <div class="target-strip-state memorizing" id="target-strip-state">MEMORIZE</div>
-          </div>
-
-          <!-- Picker area -->
-          <div class="picker-area">
-
-            <!-- Live preview -->
-            <div class="color-preview-row">
-              <div class="your-swatch-wrap" id="your-swatch-wrap">
-                <div class="your-swatch" id="your-swatch"></div>
-                <div class="submitted-overlay" id="submitted-overlay">
-                  <span>✓</span>
-                  <span style="font-size:0.9rem">LOCKED IN</span>
-                </div>
+            <!-- G slider -->
+            <div class="slider-row">
+              <span class="slider-label" style="color:#6bff9e">G</span>
+              <div class="slider-track-wrap">
+                <input type="range" class="color-slider" id="g-slider" min="0" max="255" value="128" />
               </div>
-              <div class="your-hex-label">
-                <span class="your-label-text">YOUR COLOR</span>
-                <div class="your-hex-val" id="your-hex-display">#808080</div>
-                <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text-muted);margin-top:2px" id="your-rgb-display">R:128 G:128 B:128</div>
+              <span class="slider-val" id="g-val">128</span>
+            </div>
+            <!-- B slider -->
+            <div class="slider-row">
+              <span class="slider-label" style="color:#6ba7ff">B</span>
+              <div class="slider-track-wrap">
+                <input type="range" class="color-slider" id="b-slider" min="0" max="255" value="128" />
               </div>
+              <span class="slider-val" id="b-val">128</span>
             </div>
 
-            <!-- Sliders -->
-            <div class="sliders-card">
-              <div class="slider-row">
-                <span class="slider-channel-label" style="color:#ff5555">R</span>
-                <div class="slider-track-wrap">
-                  <input type="range" class="color-slider" id="r-slider" min="0" max="255" value="128" />
-                </div>
-                <span class="slider-val" id="r-val">128</span>
-              </div>
-              <div class="slider-row">
-                <span class="slider-channel-label" style="color:#44ff88">G</span>
-                <div class="slider-track-wrap">
-                  <input type="range" class="color-slider" id="g-slider" min="0" max="255" value="128" />
-                </div>
-                <span class="slider-val" id="g-val">128</span>
-              </div>
-              <div class="slider-row">
-                <span class="slider-channel-label" style="color:#5599ff">B</span>
-                <div class="slider-track-wrap">
-                  <input type="range" class="color-slider" id="b-slider" min="0" max="255" value="128" />
-                </div>
-                <span class="slider-val" id="b-val">128</span>
-              </div>
+            <div class="slider-divider"></div>
 
-              <!-- Hex row -->
-              <div class="hex-row">
-                <div class="hex-input-wrap">
-                  <span class="hex-prefix">#</span>
-                  <input type="text" class="hex-input" id="hex-text-input" maxlength="6" placeholder="808080" autocomplete="off" disabled/>
-                </div>
-                <button class="btn-eyedrop" title="Open color picker">
-                  🎨
-                  <input type="color" id="color-picker-native" value="#808080" />
-                </button>
+            <!-- Saturation -->
+            <div class="slider-row">
+              <span class="slider-label" style="color:rgba(255,255,255,0.4);font-size:0.5rem;width:28px">SAT</span>
+              <div class="slider-track-wrap">
+                <input type="range" class="color-slider" id="sat-slider" min="0" max="100" value="0" />
               </div>
+              <span class="slider-val" id="sat-val">0%</span>
             </div>
-
-          </div><!-- /picker-area -->
-
-        </div><!-- /game-content -->
-
-        <!-- Bottom bar -->
-        <div class="game-bottombar">
-          <div class="status-pills">
-            <div class="status-pill">
-              <div class="status-dot pulsing" id="my-dot"></div>
-              <span id="my-status-text">YOU — MEMORIZING</span>
-            </div>
-            <div class="status-pill">
-              <div class="status-dot pulsing" id="opp-dot"></div>
-              <span id="opp-status-text">OPP — MEMORIZING</span>
+            <!-- Brightness -->
+            <div class="slider-row">
+              <span class="slider-label" style="color:rgba(255,255,255,0.4);font-size:0.5rem;width:28px">BRI</span>
+              <div class="slider-track-wrap">
+                <input type="range" class="color-slider" id="bri-slider" min="0" max="100" value="50" />
+              </div>
+              <span class="slider-val" id="bri-val">50%</span>
             </div>
           </div>
-          <button class="btn-submit" id="submit-btn" disabled>LOCK IN</button>
+
+          <!-- Bottom bar -->
+          <div class="game-bottombar">
+            <div class="status-pills">
+              <div class="status-pill">
+                <div class="status-dot pulsing" id="my-dot"></div>
+                <span id="my-status-text">YOU — MEMORIZING</span>
+              </div>
+              <div class="status-pill">
+                <div class="status-dot pulsing" id="opp-dot"></div>
+                <span id="opp-status-text">OPP — MEMORIZING</span>
+              </div>
+            </div>
+            <button class="btn-submit" id="submit-btn" disabled>LOCK IN</button>
+          </div>
         </div>
 
       </div>
@@ -1381,7 +682,6 @@
     <div id="result-overlay">
       <div class="result-label" id="result-round-label">ROUND 1 / 5 RESULT</div>
       <div class="result-title" id="result-title">ROUND OVER</div>
-
       <div class="result-swatches">
         <div class="result-color-block">
           <div class="label">TARGET</div>
@@ -1390,7 +690,6 @@
         </div>
         <div id="result-player-swatches" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:flex-end"></div>
       </div>
-
       <div class="result-cards" id="result-cards"></div>
       <div class="result-countdown" id="result-countdown">NEXT ROUND IN 5...</div>
     </div>
@@ -1416,64 +715,136 @@
       let countdownInterval = null;
       let revealTimerInterval = null;
 
+      // HSB state for sat/bri sliders
+      let currentH = 0, currentS = 0, currentBri = 50;
+
       // ============ HELPERS ============
       function showScreen(id) {
         document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
         document.getElementById(id).classList.add("active");
       }
-
       function showToast(msg, duration = 3000) {
         const t = document.getElementById("toast");
         t.textContent = msg;
         t.classList.add("show");
         setTimeout(() => t.classList.remove("show"), duration);
       }
-
       function rgbToHex(r, g, b) {
         return "#" + [r, g, b].map(x => x.toString(16).padStart(2, "0").toUpperCase()).join("");
       }
-
       function hexToRgb(hex) {
         hex = hex.replace("#", "");
         if (hex.length !== 6) return null;
+        return { r: parseInt(hex.slice(0,2),16), g: parseInt(hex.slice(2,4),16), b: parseInt(hex.slice(4,6),16) };
+      }
+
+      // RGB <-> HSB (Hue 0-360, Sat 0-100, Bri 0-100)
+      function rgbToHsb(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r,g,b), min = Math.min(r,g,b);
+        const bri = max * 100;
+        const sat = max === 0 ? 0 : ((max - min) / max) * 100;
+        let hue = 0;
+        if (max !== min) {
+          const d = max - min;
+          if (max === r) hue = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+          else if (max === g) hue = ((b - r) / d + 2) / 6;
+          else hue = ((r - g) / d + 4) / 6;
+          hue *= 360;
+        }
+        return { h: hue, s: sat, b: bri };
+      }
+      function hsbToRgb(h, s, b) {
+        s /= 100; b /= 100;
+        const k = n => (n + h / 60) % 6;
+        const f = n => b * (1 - s * Math.max(0, Math.min(k(n), 4 - k(n), 1)));
         return {
-          r: parseInt(hex.slice(0, 2), 16),
-          g: parseInt(hex.slice(2, 4), 16),
-          b: parseInt(hex.slice(4, 6), 16),
+          r: Math.round(f(5) * 255),
+          g: Math.round(f(3) * 255),
+          b: Math.round(f(1) * 255),
         };
       }
 
-      function updateMyColor(r, g, b) {
-        currentR = Math.max(0, Math.min(255, r));
-        currentG = Math.max(0, Math.min(255, g));
-        currentB = Math.max(0, Math.min(255, b));
+      // Luminance for text contrast
+      function luminance(r, g, b) {
+        return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+      }
+
+      function updateSliderGradients(r, g, b) {
+        // Live RGB slider gradients
+        document.getElementById("r-slider").style.background =
+          `linear-gradient(to right, rgb(0,${g},${b}), rgb(255,${g},${b}))`;
+        document.getElementById("g-slider").style.background =
+          `linear-gradient(to right, rgb(${r},0,${b}), rgb(${r},255,${b}))`;
+        document.getElementById("b-slider").style.background =
+          `linear-gradient(to right, rgb(${r},${g},0), rgb(${r},${g},255))`;
+
+        // Saturation: grey of same bri → full sat color
+        const fullyDesaturated = hsbToRgb(currentH, 0, currentBri);
+        const fullySaturated = hsbToRgb(currentH, 100, currentBri);
+        document.getElementById("sat-slider").style.background =
+          `linear-gradient(to right, rgb(${fullyDesaturated.r},${fullyDesaturated.g},${fullyDesaturated.b}), rgb(${fullySaturated.r},${fullySaturated.g},${fullySaturated.b}))`;
+
+        // Brightness: black → full bri of current hue+sat
+        const fullBri = hsbToRgb(currentH, currentS, 100);
+        document.getElementById("bri-slider").style.background =
+          `linear-gradient(to right, #000, rgb(${fullBri.r},${fullBri.g},${fullBri.b}))`;
+      }
+
+      function updateMyColor(r, g, b, fromHsb = false) {
+        currentR = Math.max(0, Math.min(255, Math.round(r)));
+        currentG = Math.max(0, Math.min(255, Math.round(g)));
+        currentB = Math.max(0, Math.min(255, Math.round(b)));
+
+        // Sync HSB state if coming from RGB
+        if (!fromHsb) {
+          const hsb = rgbToHsb(currentR, currentG, currentB);
+          currentH = hsb.h;
+          currentS = hsb.s;
+          currentBri = hsb.b;
+          document.getElementById("sat-slider").value = Math.round(currentS);
+          document.getElementById("bri-slider").value = Math.round(currentBri);
+          document.getElementById("sat-val").textContent = Math.round(currentS) + "%";
+          document.getElementById("bri-val").textContent = Math.round(currentBri) + "%";
+        }
+
         const hex = rgbToHex(currentR, currentG, currentB);
-        document.getElementById("your-swatch").style.background = hex;
+
+        // Update canvas background
+        const canvas = document.getElementById("color-canvas");
+        canvas.style.backgroundColor = hex;
+
+        // Adjust text contrast
+        const lum = luminance(currentR, currentG, currentB);
+        const overlayTextColor = lum > 0.5 ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.9)";
+        const overlaySubColor = lum > 0.5 ? "rgba(0,0,0,0.45)" : "rgba(255,255,255,0.45)";
+        document.getElementById("canvas-hex").style.color = overlayTextColor;
+        document.getElementById("canvas-rgb").style.color = overlaySubColor;
+
+        // Update display
+        document.getElementById("canvas-hex").textContent = hex;
+        document.getElementById("canvas-rgb").textContent = `R ${currentR} · G ${currentG} · B ${currentB}`;
+
+        // Sync RGB sliders
         document.getElementById("r-slider").value = currentR;
         document.getElementById("g-slider").value = currentG;
         document.getElementById("b-slider").value = currentB;
         document.getElementById("r-val").textContent = currentR;
         document.getElementById("g-val").textContent = currentG;
         document.getElementById("b-val").textContent = currentB;
-        document.getElementById("hex-text-input").value = hex.replace("#", "");
-        document.getElementById("your-hex-display").textContent = hex;
-        document.getElementById("your-rgb-display").textContent = `R:${currentR} G:${currentG} B:${currentB}`;
-        document.getElementById("color-picker-native").value = hex;
+
+        updateSliderGradients(currentR, currentG, currentB);
       }
 
       // ============ FULLSCREEN REVEAL ============
       function showColorReveal(targetColor, round, maxRounds, memorizeSeconds) {
         const reveal = document.getElementById("color-reveal");
-
-        // Set background to the target color
         reveal.style.background = targetColor.hex;
 
-        // Determine text color contrast
         const brightness = (targetColor.r * 299 + targetColor.g * 587 + targetColor.b * 114) / 1000;
         const textColor = brightness > 140 ? "rgba(0,0,0,0.85)" : "rgba(255,255,255,0.92)";
         const subTextColor = brightness > 140 ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)";
 
-        // Apply contrast colors
         reveal.querySelectorAll(".reveal-memorize-text, .reveal-hex, .reveal-timer-num, .reveal-label").forEach(el => {
           el.style.color = textColor;
         });
@@ -1485,29 +856,24 @@
         document.querySelector(".reveal-bottom-bar").style.background = brightness > 140 ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.15)";
         document.querySelector(".reveal-progress-bar").style.background = brightness > 140 ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.85)";
 
-        // Set content
         document.getElementById("reveal-round-label").textContent = `ROUND ${round} / ${maxRounds}`;
         document.getElementById("reveal-hex").textContent = targetColor.hex;
         document.getElementById("reveal-r").textContent = `R: ${targetColor.r}`;
         document.getElementById("reveal-g").textContent = `G: ${targetColor.g}`;
         document.getElementById("reveal-b").textContent = `B: ${targetColor.b}`;
 
-        // Ring setup: circumference = 2πr = 2π*22 ≈ 138.23
         const CIRC = 138.23;
         const ring = document.getElementById("reveal-ring");
         ring.style.strokeDashoffset = "0";
         ring.style.transition = "none";
 
-        // Progress bar
         const bar = document.getElementById("reveal-progress");
         bar.style.transition = "none";
         bar.style.transform = "scaleX(1)";
         bar.style.transformOrigin = "left";
 
-        // Show
         reveal.classList.add("active");
 
-        // Animate after frame
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             ring.style.transition = `stroke-dashoffset ${memorizeSeconds}s linear`;
@@ -1517,7 +883,6 @@
           });
         });
 
-        // Countdown number
         let secsLeft = memorizeSeconds;
         document.getElementById("reveal-timer-num").textContent = secsLeft;
         clearInterval(revealTimerInterval);
@@ -1550,14 +915,12 @@
         document.getElementById("room-code-input").value = roomId;
         socket.emit("join_room", { roomId, playerName: name });
       });
-
       document.getElementById("join-btn").addEventListener("click", () => {
         const name = document.getElementById("player-name").value.trim() || "Player";
         const roomId = document.getElementById("room-code-input").value.trim().toUpperCase();
         if (!roomId) { showToast("Enter a room code!"); return; }
         socket.emit("join_room", { roomId, playerName: name });
       });
-
       document.getElementById("room-code-input").addEventListener("keydown", e => {
         if (e.key === "Enter") document.getElementById("join-btn").click();
       });
@@ -1566,73 +929,50 @@
       document.getElementById("display-room-code").addEventListener("click", () => {
         navigator.clipboard.writeText(myRoomId).then(() => showToast("Room code copied!"));
       });
-
       function updatePlayerSlots(players) {
         ["p1-slot", "p2-slot"].forEach((id, i) => {
           const slot = document.getElementById(id);
           if (players[i]) {
             slot.classList.add("filled");
-            slot.innerHTML = `
-              <div class="player-slot-label">Player ${i+1}</div>
-              <div class="pulse-dot"></div>
-              <div class="player-slot-name">${players[i].name}</div>
-            `;
+            slot.innerHTML = `<div class="player-slot-label">Player ${i+1}</div><div class="pulse-dot"></div><div class="player-slot-name">${players[i].name}</div>`;
           } else {
             slot.classList.remove("filled");
-            slot.innerHTML = `
-              <div class="player-slot-label">Player ${i+1}</div>
-              <div class="pulse-dot"></div>
-              <div class="player-slot-empty">Waiting...</div>
-            `;
+            slot.innerHTML = `<div class="player-slot-label">Player ${i+1}</div><div class="pulse-dot"></div><div class="player-slot-empty">Waiting...</div>`;
           }
         });
       }
 
       // ============ SLIDERS ============
-      function setupSliders() {
-        ["r", "g", "b"].forEach(ch => {
-          document.getElementById(`${ch}-slider`).addEventListener("input", () => {
-            if (hasSubmitted) return;
-            currentR = parseInt(document.getElementById("r-slider").value);
-            currentG = parseInt(document.getElementById("g-slider").value);
-            currentB = parseInt(document.getElementById("b-slider").value);
-            const hex = rgbToHex(currentR, currentG, currentB);
-            document.getElementById("your-swatch").style.background = hex;
-            document.getElementById(`${ch}-val`).textContent = document.getElementById(`${ch}-slider`).value;
-            document.getElementById("hex-text-input").value = hex.replace("#", "");
-            document.getElementById("your-hex-display").textContent = hex;
-            document.getElementById("your-rgb-display").textContent = `R:${currentR} G:${currentG} B:${currentB}`;
-            document.getElementById("color-picker-native").value = hex;
-          });
-        });
-
-        document.getElementById("hex-text-input").addEventListener("input", e => {
-          if (hasSubmitted) return;
-          const rgb = hexToRgb(e.target.value);
-          if (rgb) {
-            currentR = rgb.r; currentG = rgb.g; currentB = rgb.b;
-            document.getElementById("r-slider").value = rgb.r;
-            document.getElementById("g-slider").value = rgb.g;
-            document.getElementById("b-slider").value = rgb.b;
-            document.getElementById("r-val").textContent = rgb.r;
-            document.getElementById("g-val").textContent = rgb.g;
-            document.getElementById("b-val").textContent = rgb.b;
-            const hex = "#" + e.target.value.toUpperCase();
-            document.getElementById("your-swatch").style.background = hex;
-            document.getElementById("your-hex-display").textContent = hex;
-            document.getElementById("your-rgb-display").textContent = `R:${rgb.r} G:${rgb.g} B:${rgb.b}`;
-            document.getElementById("color-picker-native").value = hex;
-          }
-        });
-
-        document.getElementById("color-picker-native").addEventListener("input", e => {
-          if (hasSubmitted) return;
-          const rgb = hexToRgb(e.target.value);
-          if (rgb) updateMyColor(rgb.r, rgb.g, rgb.b);
-        });
+      function syncRgbFromSliders() {
+        if (hasSubmitted) return;
+        const r = parseInt(document.getElementById("r-slider").value);
+        const g = parseInt(document.getElementById("g-slider").value);
+        const b = parseInt(document.getElementById("b-slider").value);
+        updateMyColor(r, g, b, false);
       }
 
-      setupSliders();
+      function syncFromSatBri() {
+        if (hasSubmitted) return;
+        currentS = parseInt(document.getElementById("sat-slider").value);
+        currentBri = parseInt(document.getElementById("bri-slider").value);
+        document.getElementById("sat-val").textContent = currentS + "%";
+        document.getElementById("bri-val").textContent = currentBri + "%";
+        const rgb = hsbToRgb(currentH, currentS, currentBri);
+        updateMyColor(rgb.r, rgb.g, rgb.b, true);
+        // keep RGB sliders in sync
+        document.getElementById("r-slider").value = currentR;
+        document.getElementById("g-slider").value = currentG;
+        document.getElementById("b-slider").value = currentB;
+        document.getElementById("r-val").textContent = currentR;
+        document.getElementById("g-val").textContent = currentG;
+        document.getElementById("b-val").textContent = currentB;
+      }
+
+      ["r", "g", "b"].forEach(ch => {
+        document.getElementById(`${ch}-slider`).addEventListener("input", syncRgbFromSliders);
+      });
+      document.getElementById("sat-slider").addEventListener("input", syncFromSatBri);
+      document.getElementById("bri-slider").addEventListener("input", syncFromSatBri);
 
       // ============ SUBMIT ============
       document.getElementById("submit-btn").addEventListener("click", () => {
@@ -1649,29 +989,22 @@
       // ============ SOCKET EVENTS ============
       socket.on("connect", () => {
         const badge = document.getElementById("conn-status");
-        badge.textContent = "● CONNECTED";
-        badge.classList.add("connected");
+        badge.textContent = "● CONNECTED"; badge.classList.add("connected");
       });
-
       socket.on("disconnect", () => {
         const badge = document.getElementById("conn-status");
-        badge.textContent = "● OFFLINE";
-        badge.classList.remove("connected");
-        badge.style.color = "var(--accent2)";
-        badge.style.borderColor = "var(--accent2)";
+        badge.textContent = "● OFFLINE"; badge.classList.remove("connected");
+        badge.style.color = "var(--accent2)"; badge.style.borderColor = "var(--accent2)";
       });
-
       socket.on("error", ({ message }) => showToast("⚠ " + message));
 
       socket.on("joined", ({ player, roomId }) => {
-        myPlayer = player;
-        myRoomId = roomId;
+        myPlayer = player; myRoomId = roomId;
         document.getElementById("display-room-code").textContent = roomId;
         document.getElementById("my-score-name").textContent = player.name.toUpperCase();
         showScreen("waiting-screen");
         showToast(`Joined room ${roomId}`);
       });
-
       socket.on("player_update", ({ players }) => {
         updatePlayerSlots(players);
         if (players.length === 2) {
@@ -1683,8 +1016,6 @@
 
       socket.on("memorize_start", ({ round, maxRounds, targetColor, scores, memorizeSeconds }) => {
         hasSubmitted = false;
-
-        // Reset UI
         document.getElementById("submit-btn").disabled = true;
         document.getElementById("submitted-overlay").classList.remove("visible");
         document.getElementById("my-dot").className = "status-dot pulsing";
@@ -1694,7 +1025,6 @@
 
         updateScores(scores);
 
-        // Game screen target strip
         document.getElementById("target-swatch").style.background = targetColor.hex;
         document.getElementById("target-swatch").style.opacity = "1";
         document.getElementById("target-hex").textContent = targetColor.hex;
@@ -1712,35 +1042,24 @@
         );
 
         document.getElementById("result-overlay").classList.remove("visible");
-
-        // Show game screen first (behind the overlay)
         showScreen("game-screen");
-
-        // Show fullscreen reveal
         showColorReveal(targetColor, round, maxRounds, memorizeSeconds);
 
-        // Countdown the strip label too
         let secsLeft = memorizeSeconds;
         clearInterval(memorizeInterval);
         memorizeInterval = setInterval(() => {
           secsLeft--;
-          if (secsLeft > 0) {
-            stateEl.textContent = `MEMORIZE ${secsLeft}s`;
-          } else {
-            clearInterval(memorizeInterval);
-          }
+          if (secsLeft > 0) { stateEl.textContent = `MEMORIZE ${secsLeft}s`; }
+          else { clearInterval(memorizeInterval); }
         }, 1000);
       });
 
       socket.on("memorize_end", () => {
         clearInterval(memorizeInterval);
         hideColorReveal();
-
-        // Hide target in strip
         document.getElementById("target-swatch").style.background = "#1a1a24";
         document.getElementById("target-swatch").style.opacity = "0.3";
         document.getElementById("target-hex").textContent = "HIDDEN";
-        document.getElementById("target-hex").style.color = "var(--text-muted)";
 
         const stateEl = document.getElementById("target-strip-state");
         stateEl.textContent = "RECALL!";
@@ -1749,7 +1068,6 @@
         document.getElementById("submit-btn").disabled = false;
         document.getElementById("my-status-text").textContent = "YOU — PICKING";
         document.getElementById("opp-status-text").textContent = "OPP — PICKING";
-
         showToast("🎨 Color hidden! Match from memory!");
       });
 
@@ -1760,16 +1078,12 @@
           showToast(`Opponent locked in! (${submissionOrder}/${totalPlayers})`);
         }
       });
-
       socket.on("round_result", ({ results, targetColor, round, maxRounds }) => {
         showRoundResult(results, targetColor, round, maxRounds);
       });
-
       socket.on("game_over", ({ finalResults }) => showGameOver(finalResults));
-
       socket.on("player_disconnected", ({ players }) => {
-        showToast("⚠ Opponent disconnected!");
-        updatePlayerSlots(players);
+        showToast("⚠ Opponent disconnected!"); updatePlayerSlots(players);
       });
 
       // ============ SCORE UPDATE ============
@@ -1783,14 +1097,11 @@
       // ============ ROUND RESULT ============
       function showRoundResult(results, targetColor, round, maxRounds) {
         document.getElementById("result-round-label").textContent = `ROUND ${round} / ${maxRounds} RESULT`;
-
         const winner = results[0];
         const isWinner = winner.playerId === socket.id;
         const isTie = results.length > 1 && winner.accuracy === results[1]?.accuracy;
-
         document.getElementById("result-title").textContent = isTie ? "IT'S A TIE!" : isWinner ? "YOU WIN! 🎯" : "OPPONENT WINS";
         document.getElementById("result-title").style.color = isWinner && !isTie ? "var(--accent)" : "var(--text)";
-
         document.getElementById("result-target-swatch").style.background = targetColor.hex;
         document.getElementById("result-target-hex").textContent = targetColor.hex;
 
@@ -1800,11 +1111,7 @@
           const hex = rgbToHex(r.color.r, r.color.g, r.color.b);
           const div = document.createElement("div");
           div.className = "result-color-block";
-          div.innerHTML = `
-            <div class="label">${r.playerName.toUpperCase()}</div>
-            <div class="result-swatch player" style="background:${hex}"></div>
-            <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-dim)">${hex}</div>
-          `;
+          div.innerHTML = `<div class="label">${r.playerName.toUpperCase()}</div><div class="result-swatch player" style="background:${hex}"></div><div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-dim)">${hex}</div>`;
           swatchCont.appendChild(div);
         });
 
@@ -1816,31 +1123,16 @@
           card.className = "result-card" + (i === 0 ? " winner-card" : "");
           card.innerHTML = `
             <div class="result-card-name">${r.playerName.toUpperCase()}${isMe ? " (YOU)" : ""}</div>
-            <div class="result-stat">
-              <span class="result-stat-label">ACCURACY</span>
-              <span class="result-stat-val highlight">${r.accuracy}%</span>
-            </div>
-            <div class="accuracy-bar-wrap">
-              <div class="accuracy-bar-fill" style="width:0%"></div>
-            </div>
-            <div class="result-stat">
-              <span class="result-stat-label">ROUND SCORE</span>
-              <span class="result-stat-val">+${r.roundScore}${r.speedBonus ? ` <span style="color:var(--accent3);font-size:0.65rem">(+${r.speedBonus} SPEED)</span>` : ""}</span>
-            </div>
-            <div class="result-stat">
-              <span class="result-stat-label">TOTAL</span>
-              <span class="result-stat-val">${r.totalScore} PTS</span>
-            </div>
-            <div class="result-stat">
-              <span class="result-stat-label">TIME</span>
-              <span class="result-stat-val" style="color:var(--text-dim)">${(r.timeTaken/1000).toFixed(1)}s</span>
-            </div>
+            <div class="result-stat"><span class="result-stat-label">ACCURACY</span><span class="result-stat-val highlight">${r.accuracy}%</span></div>
+            <div class="accuracy-bar-wrap"><div class="accuracy-bar-fill" style="width:0%"></div></div>
+            <div class="result-stat"><span class="result-stat-label">ROUND SCORE</span><span class="result-stat-val">+${r.roundScore}${r.speedBonus ? ` <span style="color:var(--accent3);font-size:0.65rem">(+${r.speedBonus} SPEED)</span>` : ""}</span></div>
+            <div class="result-stat"><span class="result-stat-label">TOTAL</span><span class="result-stat-val">${r.totalScore} PTS</span></div>
+            <div class="result-stat"><span class="result-stat-label">TIME</span><span class="result-stat-val" style="color:var(--text-dim)">${(r.timeTaken/1000).toFixed(1)}s</span></div>
             ${r.submittedFirst ? `<div style="margin-top:8px;font-family:var(--mono);font-size:0.58rem;color:var(--accent3);letter-spacing:0.1em">⚡ FIRST SUBMIT</div>` : ""}
           `;
           cardsCont.appendChild(card);
         });
 
-        // Animate accuracy bars
         setTimeout(() => {
           cardsCont.querySelectorAll(".accuracy-bar-fill").forEach((bar, i) => {
             bar.style.width = results[i].accuracy + "%";
@@ -1850,7 +1142,6 @@
         let cdSecs = round < maxRounds ? 5 : 4;
         const cdEl = document.getElementById("result-countdown");
         cdEl.textContent = round < maxRounds ? `NEXT ROUND IN ${cdSecs}...` : `GAME OVER IN ${cdSecs}...`;
-
         clearInterval(countdownInterval);
         countdownInterval = setInterval(() => {
           cdSecs--;
@@ -1865,26 +1156,18 @@
       function showGameOver(finalResults) {
         clearInterval(countdownInterval);
         document.getElementById("result-overlay").classList.remove("visible");
-
         const isWinner = finalResults[0].playerId === socket.id;
         document.getElementById("gameover-title").innerHTML = isWinner
           ? `YOU<br/><span style="color:var(--accent)">WIN!</span>`
           : `GAME<br/><span style="color:var(--accent)">OVER</span>`;
-
         const podium = document.getElementById("final-podium");
         podium.innerHTML = "";
         finalResults.forEach((r, i) => {
           const card = document.createElement("div");
           card.className = "podium-card" + (i === 0 ? " first" : "");
-          card.innerHTML = `
-            <div class="podium-rank">#${i+1}</div>
-            <div class="podium-name">${r.playerName.toUpperCase()}</div>
-            <div class="podium-score"><span>${r.totalScore}</span> PTS</div>
-            ${r.playerId === socket.id ? `<div style="font-family:var(--mono);font-size:0.55rem;color:var(--text-muted);letter-spacing:0.12em">YOU</div>` : ""}
-          `;
+          card.innerHTML = `<div class="podium-rank">#${i+1}</div><div class="podium-name">${r.playerName.toUpperCase()}</div><div class="podium-score"><span>${r.totalScore}</span> PTS</div>${r.playerId === socket.id ? `<div style="font-family:var(--mono);font-size:0.55rem;color:var(--text-muted);letter-spacing:0.12em">YOU</div>` : ""}`;
           podium.appendChild(card);
         });
-
         showScreen("gameover-screen");
       }
 
