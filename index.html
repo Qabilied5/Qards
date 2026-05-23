@@ -211,6 +211,9 @@
         </div>
         <div id="result-player-swatches" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:flex-end"></div>
       </div>
+      <!-- Similarity percentage display -->
+      <div class="result-similarity-row" id="result-similarity-row"></div>
+
       <div class="result-cards" id="result-cards"></div>
       <div class="result-countdown" id="result-countdown">NEXT ROUND IN 5...</div>
     </div>
@@ -698,6 +701,25 @@
       socket.on("game_over", ({ finalResults }) => showGameOver(finalResults));
 
       // ─── Round result ────────────────────────────────────────────────────────
+      function animateCount(el, targetVal, duration, suffix) {
+        const start = performance.now();
+        el.classList.remove("done");
+        function step(now) {
+          const progress = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = eased * targetVal;
+          el.textContent = current.toFixed(1) + suffix;
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            el.textContent = targetVal.toFixed(1) + suffix;
+            void el.offsetWidth;
+            el.classList.add("done");
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
       function showRoundResult(results, targetColor, round, maxRounds) {
         document.getElementById("result-round-label").textContent = `ROUND ${round} / ${maxRounds} RESULT`;
         const winner   = results[0];
@@ -718,6 +740,25 @@
           swatchCont.appendChild(div);
         });
 
+        // ── Similarity percentage row ──────────────────────────────────────────
+        const simRow = document.getElementById("result-similarity-row");
+        simRow.innerHTML = "";
+        results.forEach((r, i) => {
+          const isMe = r.playerId === socket.id;
+          const isFirst = i === 0;
+          const block = document.createElement("div");
+          block.className = "sim-block" + (isFirst ? " sim-winner" : "");
+          const rankLabel = isFirst ? (results.length > 1 ? "🥇" : "") : "🥈";
+          block.innerHTML = `
+            <div class="sim-name">${r.playerName.toUpperCase()}${isMe ? " <span class='sim-you'>YOU</span>" : ""}</div>
+            <div class="sim-pct" id="sim-pct-${i}">0.0%</div>
+            <div class="sim-label">SIMILARITY</div>
+            <div class="sim-bar-wrap"><div class="sim-bar-fill" id="sim-bar-${i}" style="width:0%"></div></div>
+            ${r.speedBonus ? `<div class="sim-speed">⚡ +${r.speedBonus} SPEED BONUS</div>` : ""}
+          `;
+          simRow.appendChild(block);
+        });
+
         const cardsCont = document.getElementById("result-cards");
         cardsCont.innerHTML = "";
         results.forEach((r, i) => {
@@ -726,8 +767,6 @@
           card.className = "result-card" + (i === 0 ? " winner-card" : "");
           card.innerHTML = `
             <div class="result-card-name">${r.playerName.toUpperCase()}${isMe ? " (YOU)" : ""}</div>
-            <div class="result-stat"><span class="result-stat-label">ACCURACY</span><span class="result-stat-val highlight">${r.accuracy}%</span></div>
-            <div class="accuracy-bar-wrap"><div class="accuracy-bar-fill" style="width:0%"></div></div>
             <div class="result-stat"><span class="result-stat-label">ROUND SCORE</span><span class="result-stat-val">+${r.roundScore}${r.speedBonus ? ` <span style="color:var(--accent3);font-size:0.65rem">(+${r.speedBonus} SPEED)</span>` : ""}</span></div>
             <div class="result-stat"><span class="result-stat-label">TOTAL</span><span class="result-stat-val">${r.totalScore} PTS</span></div>
             <div class="result-stat"><span class="result-stat-label">TIME</span><span class="result-stat-val" style="color:var(--text-dim)">${(r.timeTaken/1000).toFixed(1)}s</span></div>
@@ -736,11 +775,21 @@
           cardsCont.appendChild(card);
         });
 
+        // Trigger counting animation after overlay becomes visible
         setTimeout(() => {
+          results.forEach((r, i) => {
+            const pctEl = document.getElementById(`sim-pct-${i}`);
+            const barEl = document.getElementById(`sim-bar-${i}`);
+            if (pctEl) animateCount(pctEl, r.accuracy, 1200, "%");
+            if (barEl) {
+              barEl.style.transition = "width 1.2s cubic-bezier(0.16,1,0.3,1)";
+              barEl.style.width = r.accuracy + "%";
+            }
+          });
           cardsCont.querySelectorAll(".accuracy-bar-fill").forEach((bar, i) => {
             bar.style.width = results[i].accuracy + "%";
           });
-        }, 100);
+        }, 350);
 
         let cdSecs = round < maxRounds ? 5 : 4;
         const cdEl = document.getElementById("result-countdown");

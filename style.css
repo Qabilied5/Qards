@@ -1,4 +1,4 @@
-      :root {
+:root {
         --bg: #0a0a0f;
         --surface: #13131a;
         --surface2: #1a1a24;
@@ -761,11 +761,147 @@
       }
       .score-pts.flash { animation: scoreFlash 0.6s ease; }
 
-      @media screen and (max-width: 780px) {
+      /* ===== SIMILARITY PERCENTAGE ROW ===== */
+      .result-similarity-row {
+        display: flex;
+        gap: 12px;
+        width: 100%;
+        margin: 4px 0 8px;
+        justify-content: center;
+      }
+
+      .sim-block {
+        flex: 1;
+        max-width: 200px;
+        background: var(--surface2);
+        border: 1px solid var(--border-bright);
+        border-radius: var(--radius);
+        padding: 16px 14px 14px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .sim-block::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: var(--text-muted);
+        border-radius: 2px 2px 0 0;
+      }
+
+      .sim-block.sim-winner {
+        border-color: var(--accent);
+        background: rgba(200,255,0,0.04);
+      }
+
+      .sim-block.sim-winner::before {
+        background: var(--accent);
+        box-shadow: 0 0 12px rgba(200,255,0,0.5);
+      }
+
+      .sim-name {
+        font-family: var(--mono);
+        font-size: 0.52rem;
+        color: var(--text-dim);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .sim-you {
+        color: var(--accent3);
+        font-size: 0.48rem;
+        border: 1px solid var(--accent3);
+        padding: 1px 5px;
+        border-radius: 10px;
+        letter-spacing: 0.1em;
+      }
+
+      .sim-pct {
+        font-family: var(--display);
+        font-size: clamp(2.6rem, 10vw, 4rem);
+        line-height: 1;
+        letter-spacing: 0.02em;
+        color: var(--text);
+        margin: 4px 0 2px;
+        transition: color 0.3s;
+      }
+
+      .sim-block.sim-winner .sim-pct {
+        color: var(--accent);
+      }
+
+      .sim-label {
+        font-family: var(--mono);
+        font-size: 0.48rem;
+        color: var(--text-muted);
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+
+      .sim-bar-wrap {
+        height: 3px;
+        background: var(--surface3);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 8px;
+      }
+
+      .sim-bar-fill {
+        height: 100%;
+        background: var(--text-dim);
+        border-radius: 2px;
+        width: 0%;
+      }
+
+      .sim-block.sim-winner .sim-bar-fill {
+        background: var(--accent);
+        box-shadow: 0 0 6px rgba(200,255,0,0.4);
+      }
+
+      .sim-speed {
+        font-family: var(--mono);
+        font-size: 0.48rem;
+        color: var(--accent3);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      /* Animate sim-block entrance */
+      #result-overlay.visible .sim-block {
+        animation: simBlockIn 0.5s cubic-bezier(0.16,1,0.3,1) both;
+      }
+      #result-overlay.visible .sim-block:nth-child(1) { animation-delay: 0.22s; }
+      #result-overlay.visible .sim-block:nth-child(2) { animation-delay: 0.3s; }
+
+      @keyframes simBlockIn {
+        from { opacity: 0; transform: translateY(20px) scale(0.94); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      /* Pct number pop when counting finishes — added via JS */
+      .sim-pct.done {
+        animation: simPctPop 0.4s cubic-bezier(0.16,1,0.3,1);
+      }
+      @keyframes simPctPop {
+        0%   { transform: scale(1); }
+        45%  { transform: scale(1.12); }
+        100% { transform: scale(1); }
+      }
+
+      /* ===== RESULT OVERLAY stagger update ===== */
+      #result-overlay.visible .result-similarity-row { animation: slideUp 0.45s 0.18s cubic-bezier(0.16,1,0.3,1) both; }
         .canvas-hex.visible, .canvas-rgb.visible {
             background: transparent;
         }
         .game-topbar.visible {
             background: transparent;
         }
-      }
