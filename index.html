@@ -176,6 +176,21 @@
       .player-slot.filled .pulse-dot { background: var(--accent3); animation: none; }
       @keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.1); } }
       .waiting-msg { font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim); letter-spacing: 0.1em; text-align: center; }
+      .lobby-player-row {
+        display: flex; align-items: center; gap: 12px;
+        background: var(--surface2); border: 1px solid var(--border);
+        border-radius: var(--radius-sm); padding: 12px 16px;
+      }
+      .lobby-player-row.is-host { border-color: var(--accent); }
+      .lobby-player-num { font-family: var(--mono); font-size: 0.6rem; color: var(--text-muted); min-width: 20px; }
+      .lobby-player-name { flex: 1; font-weight: 600; font-size: 0.9rem; }
+      .lobby-player-badge {
+        font-family: var(--mono); font-size: 0.55rem; letter-spacing: 0.1em;
+        padding: 3px 8px; border-radius: 20px;
+        background: var(--accent-dim); color: var(--accent);
+        border: 1px solid var(--accent);
+      }
+      .lobby-player-badge.you { background: var(--accent3-dim); color: var(--accent3); border-color: var(--accent3); }
       .blink { animation: blink 1s step-end infinite; }
       @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
@@ -760,7 +775,7 @@
       }
       .score-pts.flash { animation: scoreFlash 0.6s ease; }
 
-      @media screen (max-width: 780px) {
+      @media screen and (max-width: 780px) {
         .canvas-hex.visible, .canvas-rgb.visible {
             background: transparent;
         }
@@ -855,19 +870,10 @@
       <div class="room-code-label">ROOM CODE</div>
       <div class="room-code" id="display-room-code" title="Tap to copy">----</div>
       <div class="copy-hint">TAP TO COPY</div>
-      <div class="players-grid">
-        <div class="player-slot" id="p1-slot">
-          <div class="player-slot-label">Player 1</div>
-          <div class="pulse-dot"></div>
-          <div class="player-slot-empty">Waiting...</div>
-        </div>
-        <div class="player-slot" id="p2-slot">
-          <div class="player-slot-label">Player 2</div>
-          <div class="pulse-dot"></div>
-          <div class="player-slot-empty">Waiting...</div>
-        </div>
-      </div>
-      <div class="waiting-msg" id="waiting-msg">SHARE THE CODE WITH YOUR OPPONENT<span class="blink">_</span></div>
+      <div id="lobby-player-list" style="width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px;margin-top:4px;"></div>
+      <div class="waiting-msg" id="waiting-msg">WAITING FOR PLAYERS<span class="blink">_</span></div>
+      <button class="btn-primary" id="start-btn" style="display:none;width:100%;max-width:420px;margin-top:8px">START GAME</button>
+      <div id="host-hint" style="font-family:var(--mono);font-size:0.6rem;color:var(--text-muted);letter-spacing:0.1em;text-align:center;display:none">WAITING FOR HOST TO START</div>
     </div>
 
     <!-- ============ GAME SCREEN ============ -->
@@ -1203,119 +1209,128 @@
       }
 
       // ============ LOBBY ============
+      // ─── Button handlers ───────────────────────────────────────────────────
+      function getPlayerName() {
+        return (document.getElementById("player-name-input")?.value || "").trim() || "Player";
+      }
+
       document.getElementById("solo-btn").addEventListener("click", () => {
-        const name = document.getElementById("player-name").value.trim() || "Player";
-        socket.emit("solo_start", { playerName: name });
+        socket.emit("solo_start", { playerName: getPlayerName() });
       });
 
       document.getElementById("create-btn").addEventListener("click", () => {
-        const name = document.getElementById("player-name").value.trim() || "Player";
-        const roomId = Math.random().toString(36).slice(2, 8).toUpperCase();
-        document.getElementById("room-code-input").value = roomId;
-        socket.emit("join_room", { roomId, playerName: name });
+        socket.emit("create_room", { playerName: getPlayerName() });
       });
+
       document.getElementById("join-btn").addEventListener("click", () => {
-        const name = document.getElementById("player-name").value.trim() || "Player";
         const roomId = document.getElementById("room-code-input").value.trim().toUpperCase();
         if (!roomId) { showToast("Enter a room code!"); return; }
-        socket.emit("join_room", { roomId, playerName: name });
+        socket.emit("join_room", { roomId, playerName: getPlayerName() });
       });
+
       document.getElementById("room-code-input").addEventListener("keydown", e => {
         if (e.key === "Enter") document.getElementById("join-btn").click();
       });
 
-      // ============ WAITING ============
       document.getElementById("display-room-code").addEventListener("click", () => {
-        navigator.clipboard.writeText(myRoomId).then(() => {
-          showToast("Room code copied!");
-          const el = document.getElementById("display-room-code");
-          el.classList.add("copied");
-          setTimeout(() => el.classList.remove("copied"), 600);
-        });
+        const code = document.getElementById("display-room-code").textContent;
+        if (!code || code === "----" || code === "SOLO") return;
+        navigator.clipboard?.writeText(code).catch(() => {});
+        showToast("Room code copied!");
       });
-      function updatePlayerSlots(players) {
-        ["p1-slot", "p2-slot"].forEach((id, i) => {
-          const slot = document.getElementById(id);
-          if (players[i]) {
-            slot.classList.add("filled");
-            slot.innerHTML = `<div class="player-slot-label">Player ${i+1}</div><div class="pulse-dot"></div><div class="player-slot-name">${players[i].name}</div>`;
-          } else {
-            slot.classList.remove("filled");
-            slot.innerHTML = `<div class="player-slot-label">Player ${i+1}</div><div class="pulse-dot"></div><div class="player-slot-empty">Waiting...</div>`;
-          }
+
+      document.getElementById("start-btn").addEventListener("click", () => {
+        socket.emit("host_start");
+      });
+
+      // ─── Render lobby player list ────────────────────────────────────────────
+      function renderLobbyPlayers(players, hostId, myId) {
+        const list = document.getElementById("lobby-player-list");
+        list.innerHTML = "";
+        players.forEach((p, i) => {
+          const isHost = p.id === hostId;
+          const isMe   = p.id === myId;
+          const row    = document.createElement("div");
+          row.className = "lobby-player-row" + (isHost ? " is-host" : "");
+          row.innerHTML =
+            `<span class="lobby-player-num">#${i + 1}</span>` +
+            `<span class="lobby-player-name">${p.name}</span>` +
+            (isHost ? `<span class="lobby-player-badge">HOST</span>` : "") +
+            (isMe   ? `<span class="lobby-player-badge you">YOU</span>` : "");
+          list.appendChild(row);
         });
       }
 
-      // ============ SLIDERS ============
-      function syncFromHsb() {
-        if (hasSubmitted) return;
-        currentH = parseInt(document.getElementById("hue-slider").value);
-        currentS = parseInt(document.getElementById("sat-slider").value);
-        currentBri = parseInt(document.getElementById("bri-slider").value);
-        document.getElementById("hue-val").textContent = currentH + "°";
-        document.getElementById("sat-val").textContent = currentS + "%";
-        document.getElementById("bri-val").textContent = currentBri + "%";
-        const rgb = hsbToRgb(currentH, currentS, currentBri);
-        updateMyColor(rgb.r, rgb.g, rgb.b, true);
+      function updateWaitingScreen(players, hostId, isHost, canStart) {
+        renderLobbyPlayers(players, hostId, socket.id);
+        const startBtn  = document.getElementById("start-btn");
+        const hostHint  = document.getElementById("host-hint");
+        const waitMsg   = document.getElementById("waiting-msg");
+
+        if (isHost) {
+          startBtn.style.display = canStart ? "block" : "none";
+          hostHint.style.display = "none";
+          waitMsg.innerHTML = canStart
+            ? `${players.length} PLAYERS READY — START WHEN READY<span class="blink">_</span>`
+            : `WAITING FOR PLAYERS (${players.length}/2 min)<span class="blink">_</span>`;
+        } else {
+          startBtn.style.display = "none";
+          hostHint.style.display = "block";
+          waitMsg.innerHTML = `${players.length} PLAYER${players.length > 1 ? "S" : ""} IN LOBBY<span class="blink">_</span>`;
+        }
       }
 
-      ["hue", "sat", "bri"].forEach(ch => {
-        document.getElementById(`${ch}-slider`).addEventListener("input", syncFromHsb);
-      });
-
-      // ============ SUBMIT ============
-      document.getElementById("submit-btn").addEventListener("click", () => {
-        if (hasSubmitted) return;
-        hasSubmitted = true;
-        document.getElementById("submit-btn").disabled = true;
-        document.getElementById("submitted-overlay").classList.add("visible");
-        document.getElementById("my-dot").classList.remove("pulsing");
-        document.getElementById("my-dot").classList.add("submitted");
-        document.getElementById("my-status-text").textContent = "YOU — LOCKED IN ✓";
-        socket.emit("submit_color", { color: { r: currentR, g: currentG, b: currentB } });
-      });
-
-      // ============ SOCKET EVENTS ============
       socket.on("connect", () => {
-        const badge = document.getElementById("conn-status");
-        badge.textContent = "● CONNECTED"; badge.classList.add("connected");
+        document.querySelector(".conn-badge").textContent = "CONNECTED";
+        document.querySelector(".conn-badge").classList.add("connected");
       });
       socket.on("disconnect", () => {
-        const badge = document.getElementById("conn-status");
-        badge.textContent = "● OFFLINE"; badge.classList.remove("connected");
-        badge.style.color = "var(--accent2)"; badge.style.borderColor = "var(--accent2)";
+        document.querySelector(".conn-badge").textContent = "OFFLINE";
+        document.querySelector(".conn-badge").classList.remove("connected");
       });
+
       socket.on("error", ({ message }) => showToast("⚠ " + message));
 
       socket.on("joined", ({ player, roomId, soloMode }) => {
-        myPlayer = player; myRoomId = roomId; isSoloMode = !!soloMode;
+        myPlayer  = player;
+        myRoomId  = roomId;
+        isSoloMode = !!soloMode;
         document.getElementById("display-room-code").textContent = soloMode ? "SOLO" : roomId;
         document.getElementById("my-score-name").textContent = player.name.toUpperCase();
+        showScreen("waiting-screen");
         if (soloMode) {
-          document.getElementById("opp-score-name").textContent = "BOT";
-          showScreen("waiting-screen");
           document.getElementById("waiting-msg").innerHTML = "SOLO MODE — STARTING<span class='blink'>_</span>";
-        } else {
-          showScreen("waiting-screen");
-          showToast(`Joined room ${roomId}`);
+          document.getElementById("start-btn").style.display  = "none";
+          document.getElementById("host-hint").style.display  = "none";
         }
       });
-      socket.on("player_update", ({ players, soloMode }) => {
-        if (soloMode) {
-          // Show player slot + bot slot
-          const p1 = document.getElementById("p1-slot");
-          p1.classList.add("filled");
-          p1.innerHTML = `<div class="player-slot-label">Player 1</div><div class="pulse-dot"></div><div class="player-slot-name">${players[0]?.name || "You"}</div>`;
-          const p2 = document.getElementById("p2-slot");
-          p2.classList.add("filled");
-          p2.innerHTML = `<div class="player-slot-label">Bot</div><div class="pulse-dot" style="background:var(--accent3)"></div><div class="player-slot-name" style="color:var(--accent3)">BOT</div>`;
-          return;
-        }
-        updatePlayerSlots(players);
-        if (players.length === 2) {
-          document.getElementById("waiting-msg").innerHTML = "BOTH PLAYERS READY — STARTING<span class='blink'>_</span>";
-          const opp = players.find(p => p.id !== myPlayer?.id);
-          if (opp) document.getElementById("opp-score-name").textContent = opp.name.toUpperCase();
+
+      socket.on("lobby_state", ({ players, hostId, isHost, canStart }) => {
+        updateWaitingScreen(players, hostId, isHost, canStart);
+        // Update opponent name for score bar (first non-me player)
+        const opp = players.find(p => p.id !== socket.id);
+        if (opp) document.getElementById("opp-score-name").textContent = opp.name.toUpperCase();
+      });
+
+      socket.on("you_are_host", () => {
+        showToast("You are now the host!");
+      });
+
+      socket.on("game_starting", ({ players }) => {
+        document.getElementById("waiting-msg").innerHTML = "GAME STARTING<span class='blink'>_</span>";
+        document.getElementById("start-btn").style.display = "none";
+        document.getElementById("host-hint").style.display = "none";
+        // Set opp name for 2-player case
+        const opp = players.find(p => p.id !== socket.id);
+        if (opp) document.getElementById("opp-score-name").textContent = opp.name.toUpperCase();
+      });
+
+      socket.on("player_disconnected", ({ players, hostId }) => {
+        showToast("⚠ A player disconnected!");
+        if (players && hostId) {
+          const isHost = socket.id === hostId;
+          const canStart = isHost && players.length >= 2;
+          updateWaitingScreen(players, hostId, isHost, canStart);
         }
       });
 
@@ -1323,28 +1338,27 @@
         hasSubmitted = false;
         document.getElementById("submit-btn").disabled = true;
         document.getElementById("submitted-overlay").classList.remove("visible");
-        document.getElementById("my-dot").className = "status-dot pulsing";
-        document.getElementById("opp-dot").className = "status-dot pulsing";
-        document.getElementById("my-status-text").textContent = "YOU — MEMORIZING";
+        document.getElementById("my-dot").className   = "status-dot pulsing";
+        document.getElementById("opp-dot").className  = "status-dot pulsing";
+        document.getElementById("my-status-text").textContent  = "YOU — MEMORIZING";
         document.getElementById("opp-status-text").textContent = isSoloMode ? "BOT — MEMORIZING" : "OPP — MEMORIZING";
 
         updateScores(scores);
 
         document.getElementById("target-swatch").style.background = targetColor.hex;
-        document.getElementById("target-swatch").style.opacity = "1";
-        document.getElementById("target-hex").textContent = targetColor.hex;
+        document.getElementById("target-swatch").style.opacity    = "1";
+        document.getElementById("target-hex").textContent         = targetColor.hex;
 
         const roundEl = document.getElementById("round-display");
         roundEl.classList.remove("flip");
-        void roundEl.offsetWidth; // reflow
+        void roundEl.offsetWidth;
         roundEl.textContent = `${round} / ${maxRounds}`;
         roundEl.classList.add("flip");
 
         const stateEl = document.getElementById("target-strip-state");
         stateEl.textContent = `MEMORIZE ${memorizeSeconds}s`;
-        stateEl.className = "target-strip-state memorizing";
+        stateEl.className   = "target-strip-state memorizing";
 
-        // Random starting picker color
         updateMyColor(
           Math.floor(Math.random() * 256),
           Math.floor(Math.random() * 256),
@@ -1359,8 +1373,8 @@
         clearInterval(memorizeInterval);
         memorizeInterval = setInterval(() => {
           secsLeft--;
-          if (secsLeft > 0) { stateEl.textContent = `MEMORIZE ${secsLeft}s`; }
-          else { clearInterval(memorizeInterval); }
+          if (secsLeft > 0) stateEl.textContent = `MEMORIZE ${secsLeft}s`;
+          else clearInterval(memorizeInterval);
         }, 1000);
       });
 
@@ -1368,19 +1382,18 @@
         clearInterval(memorizeInterval);
         hideColorReveal();
         document.getElementById("target-swatch").style.background = "#1a1a24";
-        document.getElementById("target-swatch").style.opacity = "0.3";
-        document.getElementById("target-hex").textContent = "HIDDEN";
+        document.getElementById("target-swatch").style.opacity    = "0.3";
+        document.getElementById("target-hex").textContent         = "HIDDEN";
 
         const stateEl = document.getElementById("target-strip-state");
         stateEl.textContent = "RECALL!";
-        stateEl.className = "target-strip-state hidden";
+        stateEl.className   = "target-strip-state hidden";
 
         document.getElementById("submit-btn").disabled = false;
-        document.getElementById("my-status-text").textContent = "YOU — PICKING";
+        document.getElementById("my-status-text").textContent  = "YOU — PICKING";
         document.getElementById("opp-status-text").textContent = isSoloMode ? "BOT — PICKING" : "OPP — PICKING";
         showToast("🎨 Color hidden! Match from memory!");
 
-        // Re-animate sliders to draw attention
         document.querySelectorAll(".slider-row").forEach(row => row.classList.remove("anim-in"));
         setTimeout(() => {
           document.querySelectorAll(".slider-row").forEach(row => row.classList.add("anim-in"));
@@ -1389,48 +1402,47 @@
 
       socket.on("player_submitted", ({ playerId, submissionOrder, totalPlayers }) => {
         if (playerId !== socket.id) {
-          document.getElementById("opp-dot").className = "status-dot submitted";
+          document.getElementById("opp-dot").className         = "status-dot submitted";
           document.getElementById("opp-status-text").textContent = isSoloMode ? "BOT — LOCKED IN ✓" : "OPP — LOCKED IN ✓";
-          showToast(isSoloMode ? `Bot locked in! (${submissionOrder}/${totalPlayers})` : `Opponent locked in! (${submissionOrder}/${totalPlayers})`);
+          showToast(isSoloMode
+            ? `Bot locked in! (${submissionOrder}/${totalPlayers})`
+            : `Opponent locked in! (${submissionOrder}/${totalPlayers})`);
         }
       });
+
       socket.on("round_result", ({ results, targetColor, round, maxRounds }) => {
         showRoundResult(results, targetColor, round, maxRounds);
       });
-      socket.on("game_over", ({ finalResults }) => showGameOver(finalResults));
-      socket.on("player_disconnected", ({ players }) => {
-        showToast("⚠ Opponent disconnected!"); updatePlayerSlots(players);
-      });
 
-      // ============ SCORE UPDATE ============
+      socket.on("game_over", ({ finalResults }) => showGameOver(finalResults));
+
+      // ─── Score update ────────────────────────────────────────────────────────
       function updateScores(scores) {
         if (!myPlayer) return;
-        const myScoreEl = document.getElementById("my-score");
+        const myScoreEl  = document.getElementById("my-score");
         const oppScoreEl = document.getElementById("opp-score");
         const newMyScore = scores[socket.id] || 0;
-        const oppId = Object.keys(scores).find(id => id !== socket.id);
+        const oppId      = Object.keys(scores).find(id => id !== socket.id);
         const newOppScore = oppId ? (scores[oppId] || 0) : 0;
 
         if (myScoreEl.textContent !== String(newMyScore)) {
           myScoreEl.textContent = newMyScore;
-          myScoreEl.classList.remove("bump", "flash");
-          void myScoreEl.offsetWidth;
+          myScoreEl.classList.remove("bump", "flash"); void myScoreEl.offsetWidth;
           myScoreEl.classList.add("bump", "flash");
         }
         if (oppId && oppScoreEl.textContent !== String(newOppScore)) {
           oppScoreEl.textContent = newOppScore;
-          oppScoreEl.classList.remove("bump", "flash");
-          void oppScoreEl.offsetWidth;
+          oppScoreEl.classList.remove("bump", "flash"); void oppScoreEl.offsetWidth;
           oppScoreEl.classList.add("bump", "flash");
         }
       }
 
-      // ============ ROUND RESULT ============
+      // ─── Round result ────────────────────────────────────────────────────────
       function showRoundResult(results, targetColor, round, maxRounds) {
         document.getElementById("result-round-label").textContent = `ROUND ${round} / ${maxRounds} RESULT`;
-        const winner = results[0];
+        const winner   = results[0];
         const isWinner = winner.playerId === socket.id;
-        const isTie = results.length > 1 && winner.accuracy === results[1]?.accuracy;
+        const isTie    = results.length > 1 && winner.accuracy === results[1]?.accuracy;
         document.getElementById("result-title").textContent = isTie ? "IT'S A TIE!" : isWinner ? "YOU WIN! 🎯" : (isSoloMode ? "BOT WINS" : "OPPONENT WINS");
         document.getElementById("result-title").style.color = isWinner && !isTie ? "var(--accent)" : "var(--text)";
         document.getElementById("result-target-swatch").style.background = targetColor.hex;
@@ -1439,12 +1451,10 @@
         const swatchCont = document.getElementById("result-player-swatches");
         swatchCont.innerHTML = "";
         results.forEach(r => {
-          const hex = rgbToHex(r.color.r, r.color.g, r.color.b);
-          const isMe = r.playerId === socket.id;
-          const displayName = r.playerName.toUpperCase();
-          const div = document.createElement("div");
+          const hex  = rgbToHex(r.color.r, r.color.g, r.color.b);
+          const div  = document.createElement("div");
           div.className = "result-color-block";
-          div.innerHTML = `<div class="label">${displayName}</div><div class="result-swatch player" style="background:${hex}"></div><div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-dim)">${hex}</div>`;
+          div.innerHTML = `<div class="label">${r.playerName.toUpperCase()}</div><div class="result-swatch player" style="background:${hex}"></div><div style="font-family:var(--mono);font-size:0.62rem;color:var(--text-dim)">${hex}</div>`;
           swatchCont.appendChild(div);
         });
 
@@ -1483,16 +1493,13 @@
         }, 1000);
 
         document.getElementById("result-overlay").classList.add("visible");
-        // Reset result cards opacity for animation re-trigger
         document.querySelectorAll(".result-card").forEach(c => {
-          c.style.transition = "none";
-          c.style.opacity = "0";
-          void c.offsetWidth;
-          c.style.transition = "";
+          c.style.transition = "none"; c.style.opacity = "0";
+          void c.offsetWidth; c.style.transition = "";
         });
       }
 
-      // ============ GAME OVER ============
+      // ─── Game over ───────────────────────────────────────────────────────────
       function showGameOver(finalResults) {
         clearInterval(countdownInterval);
         document.getElementById("result-overlay").classList.remove("visible");
