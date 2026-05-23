@@ -240,6 +240,26 @@
       // HSB state for sat/bri sliders
       let currentH = 0, currentS = 0, currentBri = 50;
 
+      // ─── Slider event listeners ──────────────────────────────────────────────
+      document.getElementById("hue-slider").addEventListener("input", function() {
+        currentH = parseFloat(this.value);
+        document.getElementById("hue-val").textContent = Math.round(currentH) + "°";
+        const rgb = hsbToRgb(currentH, currentS, currentBri);
+        updateMyColor(rgb.r, rgb.g, rgb.b, true);
+      });
+      document.getElementById("sat-slider").addEventListener("input", function() {
+        currentS = parseFloat(this.value);
+        document.getElementById("sat-val").textContent = Math.round(currentS) + "%";
+        const rgb = hsbToRgb(currentH, currentS, currentBri);
+        updateMyColor(rgb.r, rgb.g, rgb.b, true);
+      });
+      document.getElementById("bri-slider").addEventListener("input", function() {
+        currentBri = parseFloat(this.value);
+        document.getElementById("bri-val").textContent = Math.round(currentBri) + "%";
+        const rgb = hsbToRgb(currentH, currentS, currentBri);
+        updateMyColor(rgb.r, rgb.g, rgb.b, true);
+      });
+
       // ============ HELPERS ============
       function showScreen(id) {
         document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
@@ -471,6 +491,16 @@
         socket.emit("host_start");
       });
 
+      document.getElementById("submit-btn").addEventListener("click", () => {
+        if (hasSubmitted) return;
+        hasSubmitted = true;
+        document.getElementById("submit-btn").disabled = true;
+        document.getElementById("submitted-overlay").classList.add("visible");
+        document.getElementById("my-dot").className = "status-dot submitted";
+        document.getElementById("my-status-text").textContent = "YOU — LOCKED IN ✓";
+        socket.emit("submit_color", { color: { r: currentR, g: currentG, b: currentB } });
+      });
+
       // ─── Render lobby player list ────────────────────────────────────────────
       function renderLobbyPlayers(players, hostId, myId) {
         const list = document.getElementById("lobby-player-list");
@@ -505,6 +535,27 @@
           startBtn.style.display = "none";
           hostHint.style.display = "block";
           waitMsg.innerHTML = `${players.length} PLAYER${players.length > 1 ? "S" : ""} IN LOBBY<span class="blink">_</span>`;
+        }
+      }
+
+      // ─── Score update ────────────────────────────────────────────────────────
+      function updateScores(scores) {
+        if (!myPlayer) return;
+        const myScoreEl  = document.getElementById("my-score");
+        const oppScoreEl = document.getElementById("opp-score");
+        const newMyScore = scores[socket.id] || 0;
+        const oppId      = Object.keys(scores).find(id => id !== socket.id);
+        const newOppScore = oppId ? (scores[oppId] || 0) : 0;
+
+        if (myScoreEl.textContent !== String(newMyScore)) {
+          myScoreEl.textContent = newMyScore;
+          myScoreEl.classList.remove("bump", "flash"); void myScoreEl.offsetWidth;
+          myScoreEl.classList.add("bump", "flash");
+        }
+        if (oppId && oppScoreEl.textContent !== String(newOppScore)) {
+          oppScoreEl.textContent = newOppScore;
+          oppScoreEl.classList.remove("bump", "flash"); void oppScoreEl.offsetWidth;
+          oppScoreEl.classList.add("bump", "flash");
         }
       }
 
@@ -645,27 +696,6 @@
       });
 
       socket.on("game_over", ({ finalResults }) => showGameOver(finalResults));
-
-      // ─── Score update ────────────────────────────────────────────────────────
-      function updateScores(scores) {
-        if (!myPlayer) return;
-        const myScoreEl  = document.getElementById("my-score");
-        const oppScoreEl = document.getElementById("opp-score");
-        const newMyScore = scores[socket.id] || 0;
-        const oppId      = Object.keys(scores).find(id => id !== socket.id);
-        const newOppScore = oppId ? (scores[oppId] || 0) : 0;
-
-        if (myScoreEl.textContent !== String(newMyScore)) {
-          myScoreEl.textContent = newMyScore;
-          myScoreEl.classList.remove("bump", "flash"); void myScoreEl.offsetWidth;
-          myScoreEl.classList.add("bump", "flash");
-        }
-        if (oppId && oppScoreEl.textContent !== String(newOppScore)) {
-          oppScoreEl.textContent = newOppScore;
-          oppScoreEl.classList.remove("bump", "flash"); void oppScoreEl.offsetWidth;
-          oppScoreEl.classList.add("bump", "flash");
-        }
-      }
 
       // ─── Round result ────────────────────────────────────────────────────────
       function showRoundResult(results, targetColor, round, maxRounds) {
